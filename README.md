@@ -33,6 +33,7 @@ ocp-minicenter/
 │   ├── minicenter-competitive-analysis.md# positioning vs. Vertiv/Schneider, target buyer profiles
 │   ├── verification-incidents.md         # log of fabricated/stale AI claims caught and rejected
 │   ├── rfi-drafts.md                     # ready-to-send vendor RFIs for gated data
+│   ├── reference-pdfs/                   # primary-source PDFs: OCP specs, vendor cutsheets, industry background
 │   └── cad-download-prompts.md           # research prompts for real vendor CAD
 └── lib/
     └── minicenter_math.py                # pure-Python engineering calcs, zero dependencies
