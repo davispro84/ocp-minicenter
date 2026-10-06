@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>OCP Mini-Center — Executive Summary</title>
+<style>
+  :root { --ink:#1c1e22; --sub:#55595f; --line:#d8dbe0; --bg-panel:#f7f8fa; --warn-bg:#fff6e5; --warn-line:#e8c66b; --ok-bg:#eef7ee; --accent:#1a4a78; }
+  * { box-sizing: border-box; }
+  body { font-family:-apple-system,"Segoe UI",Helvetica,Arial,sans-serif; color:var(--ink); max-width:900px; margin:0 auto; padding:40px 24px 100px; line-height:1.65; }
+  h1 { font-size:28px; margin-bottom:4px; }
+  h2 { font-size:19px; margin-top:44px; color:var(--accent); border-bottom:2px solid var(--line); padding-bottom:6px; }
+  h3 { font-size:15px; margin-top:22px; }
+  .status { display:inline-block; background:var(--warn-bg); border:1px solid var(--warn-line); color:#7a5a00; font-size:12.5px; font-weight:600; padding:4px 10px; border-radius:4px; margin-bottom:20px; }
+  .lede { color:var(--sub); font-size:16px; max-width:800px; }
+  .hook { font-size:17px; font-weight:600; margin:18px 0; }
+  table { border-collapse:collapse; width:100%; margin:12px 0; font-size:14px; }
+  th, td { border:1px solid var(--line); padding:8px 10px; text-align:left; vertical-align:top; }
+  th { background:var(--bg-panel); font-weight:600; }
+  ul, ol { padding-left: 22px; }
+  li { margin-bottom: 6px; }
+  .callout { background:#eef2f7; border-left:4px solid var(--accent); padding:10px 14px; font-size:14px; margin:14px 0; }
+  .scope-note { background:var(--warn-bg); border-left:4px solid var(--warn-line); padding:10px 14px; font-size:13.5px; margin:14px 0; color:#5a4600; }
+  footer { margin-top:60px; color:var(--sub); font-size:12px; border-top:1px solid var(--line); padding-top:14px; }
+</style>
+</head>
+<body>
+
+<h1>OCP Mini-Center</h1>
+<p class="lede">A drop-and-run, 520kW modular AI compute facility for stranded power — flare gas, curtailed renewables, and decommissioned industrial interconnects.</p>
+<div class="status">EXECUTIVE SUMMARY — DRAFT v0.1 — 2026-09-29</div>
+
+<h2>1. The Case</h2>
+<p class="hook">Traditional data center buildout takes 24-36 months, gated by grid interconnection queues that most AI compute demand can't wait for. The Mini-Center is built to deploy in days at sites that already have power — just not a facility to use it.</p>
+<ul>
+  <li><strong>Speed:</strong> two-skid, flatbed-truckable architecture — crane-set, cable-terminated, commissioned on-site, not built on-site.</li>
+  <li><strong>Compatibility:</strong> standard 480V/415V 3-phase AC and OCP BMQC-compliant positive-pressure liquid cooling — supports commercial OEM AI racks (GB200 NVL72-class) with zero proprietary modification. No custom DC bus to qualify hardware against.</li>
+  <li><strong>Density:</strong> 520kW of continuous IT load across 4 racks in a 40ft footprint, N+1 CDU redundancy.</li>
+</ul>
+
+<h2>2. Physical &amp; Logistical Architecture</h2>
+<p>Not a vanity single-box concept — a real, weight-checked two-skid split, each unit a standard truckable load.</p>
+<table>
+<tr><th>Skid</th><th>Contents</th><th>Weight</th><th>Foundation</th></tr>
+<tr><td><strong>Skid A</strong> — Compute</td><td>40ft High-Cube container: 4 racks, 2× Motivair MCDU-25 CDUs (N+1), 1200A switchgear/ATS, 10kVA aux UPS</td><td>~14,100 kg (~31,100 lb)</td><td>Level 45'×12' pad or 4 frost-depth piers, ISO corner-casting supported</td></tr>
+<tr><td><strong>Skid B</strong> — Power/Mechanical</td><td>600kW-class generator, 550kW adiabatic fluid cooler</td><td>~13,348 kg (~29,420 lb) — generator weight still a vendor-submittal placeholder pending RFI reply</td><td>Standard 40'×10' pad</td></tr>
+</table>
+<p>Both skids clear standard US 80,000 lb / 20,400 kg-per-truck highway limits with several thousand kg of margin each — no overweight permits, no specialized lowboy trailers.</p>
+<p><strong>Site mating:</strong> 1200A Cam-Lok power cables (paralleled per phase) and 3" grooved Victaulic fluid couplings, connected across a ~10ft umbilical corridor after crane placement.</p>
+
+<h2>3. The Operating Envelope</h2>
+<p>A bounded, defensible envelope — not an unbounded "works anywhere" marketing claim.</p>
+<table>
+<tr><th>Parameter</th><th>Spec</th></tr>
+<tr><td>Ambient temperature</td><td>-40°C to +48°C</td></tr>
+<tr><td>Altitude</td><td>Derate above 4,000 ft</td></tr>
+<tr><td>Enclosure</td><td>IP55/MERV13 overall envelope; IP66/MERV13-16 for the internal electrical/CDU compartment</td></tr>
+</table>
+<h3>Hot climate (e.g. Permian Basin / Phoenix-class conditions)</h3>
+<p>First-principles psychrometric modeling of a hot design day (~43°C dry-bulb, low-20s°C coincident wet-bulb) shows the adiabatic pre-cool stage drops effective dry-bulb air entering the coil to ~24°C. At a realistic 5-8°C coil approach, that supplies the CDU loop at roughly 30-32°C — comfortably under the CDU's 45°C maximum primary supply limit, with real margin to spare.</p>
+<h3>Cold climate (e.g. Bakken-class conditions)</h3>
+<p>A structural IMP partition wall thermally and physically isolates the CDU/switchgear compartment. Exterior primary loop runs Dowfrost PG60, protecting to roughly -48°C (verified against Dow's own published glycol freeze-point chart).</p>
+<div class="scope-note"><strong>Explicitly out of scope:</strong> Sahara-grade sandstorm conditions and sub-PG60 extreme cold (below roughly -48°C). Bounding the claim this way is what makes it a real engineering envelope rather than an unenforceable one.</div>
+
+<h2>4. Reliability — Unmanned, Remote, and Still Accountable</h2>
+<p>The design assumes the facility will be hundreds of miles from the nearest technician. Every failure mode below assumes nobody is on-site to intervene.</p>
+<ul>
+  <li><strong>Leak response:</strong> welded stainless-steel underfloor containment pan plus zoned liquid-detection rope. A detected leak immediately trips the CDU pumps; a separate fire/smoke detector — not the leak rope — shunt-trips the main breaker, so a fluid event can't cascade into an electrical one.</li>
+  <li><strong>Blackout telemetry:</strong> a dedicated 10kVA lithium-ion UPS keeps CDU pumps, trace heating, and the monitoring stack alive independent of the main facility bus. In a total blackout, the site can still report its own fault code via a cellular-primary, satellite-backup uplink.</li>
+  <li><strong>Transit integrity:</strong> shock-isolated sub-floor mounting, sized to 2× worst-case dynamic load, protects the compute and cooling payload during unpaved-road transport to remote sites.</li>
+</ul>
+
+<h2>5. What the Site Must Provide</h2>
+<p>The "drop-and-run" model only holds if the site is correctly stubbed up 6-8 weeks ahead of delivery. Full detail in the companion Site Preparation Guide; summary below.</p>
+<table>
+<tr><th>Category</th><th>Requirement</th></tr>
+<tr><td>Civil</td><td>Two leveled pads, separated by an 8-10ft umbilical corridor</td></tr>
+<tr><td>Power</td><td>Regulated natural gas stub-up (stranded-gas sites) <em>or</em> a utility pad-mount transformer stepped to 480Y/277V (grid-tied sites)</td></tr>
+<tr><td>Water</td><td>Dedicated 3/4"-1" line, 40-60 PSI, sized to sustain up to ~230 gal/hr at peak adiabatic operation</td></tr>
+<tr><td>Data</td><td>Unobstructed sky view for satellite uplink; optional fiber hand-off if available on-site</td></tr>
+</table>
+
+<h2>6. Bottom Line</h2>
+<p>The Mini-Center's architecture, weight budget, thermal envelope, and failure-response logic are locked and internally consistent. The two remaining open items — final generator and adiabatic-cooler model selection — are gated behind vendor engineering submittals already in flight, not open design questions. This is a facility that can go from "site has power" to "site is running AI compute" in the time it takes to pour two concrete pads and drive two trucks.</p>
+
+<footer>
+  OCP Mini-Center Executive Summary — Draft v0.1 — 2026-09-29. Companion to <code>minicenter-basis-of-design.html</code>, <code>minicenter-fmea.html</code>, <code>minicenter-bom.html</code>, and <code>minicenter-site-prep-guide.html</code>.
+</footer>
+
+</body>
+</html>

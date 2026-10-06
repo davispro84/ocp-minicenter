@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>OCP Mini-Center — TCS Loop Schematic (Draft v0.1)</title>
+<style>
+  :root { --ink:#1c1e22; --sub:#55595f; --line:#d8dbe0; --bg-panel:#f7f8fa; --warn-bg:#fff6e5; --warn-line:#e8c66b; }
+  * { box-sizing: border-box; }
+  body { font-family:-apple-system,"Segoe UI",Helvetica,Arial,sans-serif; color:var(--ink); max-width:1040px; margin:0 auto; padding:40px 24px 100px; line-height:1.55; }
+  h1 { font-size:26px; margin-bottom:4px; }
+  h2 { font-size:19px; margin-top:44px; border-bottom:1px solid var(--line); padding-bottom:8px; }
+  .status { display:inline-block; background:var(--warn-bg); border:1px solid var(--warn-line); color:#7a5a00; font-size:13px; font-weight:600; padding:4px 10px; border-radius:4px; margin-bottom:20px; }
+  .lede { color:var(--sub); font-size:15px; max-width:800px; }
+  .diagram-wrap { background:var(--bg-panel); border:1px solid var(--line); border-radius:8px; padding:16px; margin:16px 0 8px; overflow-x:auto; }
+  .caption { color:var(--sub); font-size:13px; margin-top:8px; }
+  .callout { background:#fff; border-left:4px solid #4678AA; padding:10px 14px; font-size:13.5px; margin:14px 0; }
+  .callout.warn { border-left-color:#e8c66b; background:var(--warn-bg); }
+  table { border-collapse:collapse; width:100%; margin:14px 0; font-size:13px; }
+  th, td { border:1px solid var(--line); padding:7px 9px; text-align:left; }
+  th { background:var(--bg-panel); font-weight:600; }
+  code { background:#eef0f2; padding:1px 5px; border-radius:3px; font-size:12.5px; }
+  footer { margin-top:60px; color:var(--sub); font-size:12px; border-top:1px solid var(--line); padding-top:14px; }
+</style>
+</head>
+<body>
+
+<h1>OCP Mini-Center — TCS Loop Schematic</h1>
+<div class="status">DRAFT v0.1 — two real loops, one isolation boundary (the CDU). No external dry-cooler performance curve modeled yet — that product isn't selected (see FMEA item 3.4 / Basis of Design Risk Register).</div>
+<p class="lede">This replaces the single simplified block from the Basis of Design (Section 9) with the actual piping path: two separate fluid loops that never mix, connected only through the CDU's heat exchanger.</p>
+
+<div class="callout"><strong>The one thing to hold onto:</strong> there are <strong>two loops</strong>, not one. The <strong>secondary/IT loop</strong> lives entirely inside the container and only ever touches the racks and the CDU. The <strong>primary/facility loop</strong> is the one that actually goes outside to reject heat to the atmosphere. The CDU is the wall between them — it moves heat across, but the fluids never combine.</p>
+
+<h2>Full Loop — Plan/Schematic View</h2>
+<div class="diagram-wrap">
+<svg viewBox="0 0 980 460" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Helvetica,Arial,sans-serif">
+  <defs>
+    <marker id="af" markerWidth="9" markerHeight="9" refX="7" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="#4678AA"/></marker>
+    <marker id="af2" markerWidth="9" markerHeight="9" refX="7" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="#C81E1E"/></marker>
+  </defs>
+
+  <!-- container boundary -->
+  <rect x="20" y="20" width="600" height="420" fill="none" stroke="#1c1e22" stroke-width="2" stroke-dasharray="8,4"/>
+  <text x="30" y="14" font-size="12" fill="#55595f">Inside the container</text>
+
+  <!-- outside boundary -->
+  <rect x="660" y="20" width="300" height="420" fill="#f0f4f8" stroke="#1c1e22" stroke-width="2"/>
+  <text x="670" y="14" font-size="12" fill="#55595f">Outside / exterior of container</text>
+
+  <!-- Rack 1 & 2 -->
+  <rect x="50" y="60" width="130" height="90" fill="#3C3C41"/>
+  <text x="115" y="95" font-size="12" text-anchor="middle" fill="#fff">Rack 1</text>
+  <text x="115" y="112" font-size="10" text-anchor="middle" fill="#dcdcdc">cold plates</text>
+  <text x="115" y="127" font-size="10" text-anchor="middle" fill="#dcdcdc">130kW</text>
+
+  <rect x="50" y="180" width="130" height="90" fill="#3C3C41"/>
+  <text x="115" y="215" font-size="12" text-anchor="middle" fill="#fff">Rack 2</text>
+  <text x="115" y="232" font-size="10" text-anchor="middle" fill="#dcdcdc">cold plates</text>
+  <text x="115" y="247" font-size="10" text-anchor="middle" fill="#dcdcdc">130kW</text>
+
+  <!-- rack manifold -->
+  <rect x="200" y="60" width="40" height="210" fill="#8fa9c2" stroke="#4678AA"/>
+  <text x="220" y="165" font-size="10" text-anchor="middle" fill="#233" transform="rotate(-90 220,165)">Rack manifold (standard positive-pressure, OCP BMQC-style)</text>
+
+  <!-- secondary loop lines -->
+  <path d="M 240 90 H 300" stroke="#4678AA" stroke-width="3" fill="none" marker-end="url(#af)"/>
+  <text x="255" y="82" font-size="9.5" fill="#4678AA">supply (cool)</text>
+  <path d="M 300 240 H 240" stroke="#C81E1E" stroke-width="3" fill="none" marker-end="url(#af2)"/>
+  <text x="255" y="256" font-size="9.5" fill="#a30000">return (warm)</text>
+
+  <!-- CDU boundary -->
+  <rect x="300" y="55" width="150" height="220" fill="#eef2f7" stroke="#1c1e22" stroke-width="2"/>
+  <text x="375" y="75" font-size="12" text-anchor="middle" font-weight="700">CDU-1 (active)</text>
+  <text x="375" y="90" font-size="9.5" text-anchor="middle" fill="#55595f">Motivair MCDU-25</text>
+
+  <rect x="315" y="105" width="55" height="45" fill="#4678AA"/>
+  <text x="342" y="123" font-size="8.5" text-anchor="middle" fill="#fff">Centrifugal</text>
+  <text x="342" y="134" font-size="8.5" text-anchor="middle" fill="#fff">pump (×2/unit)</text>
+
+  <rect x="380" y="105" width="55" height="45" fill="#8fa9c2"/>
+  <text x="407" y="123" font-size="8" text-anchor="middle" fill="#233">Air separator /</text>
+  <text x="407" y="134" font-size="8" text-anchor="middle" fill="#233">auto-purge</text>
+
+  <line x1="315" y1="165" x2="435" y2="165" stroke="#1c1e22" stroke-width="2"/>
+  <text x="375" y="180" font-size="10" text-anchor="middle" font-weight="700">Heat exchanger (isolation boundary)</text>
+  <text x="375" y="193" font-size="8.5" text-anchor="middle" fill="#55595f">secondary ⇄ primary — fluids never mix</text>
+
+  <rect x="315" y="205" width="120" height="45" fill="#eaf5ea" stroke="#1E963C"/>
+  <text x="375" y="223" font-size="8.5" text-anchor="middle" fill="#1a6b1a">Sensors: flow, pressure,</text>
+  <text x="375" y="235" font-size="8.5" text-anchor="middle" fill="#1a6b1a">temp, water quality</text>
+
+  <!-- CDU-2 standby, smaller, dashed -->
+  <rect x="300" y="290" width="150" height="60" fill="#dfe8f0" stroke="#8fa9c2" stroke-dasharray="5,3"/>
+  <text x="375" y="315" font-size="11" text-anchor="middle" fill="#345">CDU-2 (standby, N+1)</text>
+  <text x="375" y="330" font-size="9" text-anchor="middle" fill="#567">auto-valve failover if CDU-1 faults</text>
+
+  <!-- primary loop out to exterior -->
+  <path d="M 450 100 H 660" stroke="#4678AA" stroke-width="3" fill="none" marker-end="url(#af)"/>
+  <text x="500" y="92" font-size="9.5" fill="#4678AA">primary supply (to dry cooler)</text>
+  <path d="M 660 230 H 450" stroke="#C81E1E" stroke-width="3" fill="none" marker-end="url(#af2)"/>
+  <text x="500" y="246" font-size="9.5" fill="#a30000">primary return (from dry cooler)</text>
+
+  <!-- mixing valve -->
+  <rect x="670" y="150" width="70" height="40" fill="#fff6e5" stroke="#e8c66b"/>
+  <text x="705" y="167" font-size="9" text-anchor="middle" fill="#7a5a00">3-way mixing</text>
+  <text x="705" y="178" font-size="9" text-anchor="middle" fill="#7a5a00">/ bypass valve</text>
+  <text x="705" y="200" font-size="8" text-anchor="middle" fill="#7a5a00">holds min. supply temp floor</text>
+
+  <!-- dry cooler -->
+  <rect x="820" y="80" width="120" height="140" fill="#e5eaf0" stroke="#1c1e22" stroke-width="2"/>
+  <text x="880" y="105" font-size="11" text-anchor="middle" font-weight="700">Heat Rejection</text>
+  <text x="880" y="120" font-size="9.5" text-anchor="middle" fill="#7a5a00">TBD — dry cooler /</text>
+  <text x="880" y="133" font-size="9.5" text-anchor="middle" fill="#7a5a00">adiabatic (open decision)</text>
+  <text x="880" y="155" font-size="8.5" text-anchor="middle" fill="#55595f">trace heat + insulation</text>
+  <text x="880" y="167" font-size="8.5" text-anchor="middle" fill="#55595f">on exposed exterior runs</text>
+
+  <line x1="740" y1="160" x2="820" y2="140" stroke="#4678AA" stroke-width="2" marker-end="url(#af)"/>
+  <line x1="820" y1="200" x2="740" y2="170" stroke="#C81E1E" stroke-width="2" marker-end="url(#af2)"/>
+
+  <!-- expansion tank -->
+  <rect x="670" y="260" width="70" height="40" fill="#eef0f2" stroke="#8b9096"/>
+  <text x="705" y="277" font-size="9" text-anchor="middle">Expansion tank</text>
+  <text x="705" y="289" font-size="9" text-anchor="middle">+ deaerator</text>
+
+  <!-- containment pan / leak detection -->
+  <rect x="45" y="275" width="290" height="18" fill="#fde8e8" stroke="#C81E1E" stroke-dasharray="3,2"/>
+  <text x="190" y="288" font-size="8.5" text-anchor="middle" fill="#a30000">Welded stainless containment pan + zoned leak-detection rope (auto-trips CDU pumps + ATS)</text>
+
+  <text x="20" y="400" font-size="10.5" fill="#55595f">Secondary (IT) loop stays inside, standard positive pressure, PG25 or DI water.</text>
+  <text x="20" y="418" font-size="10.5" fill="#55595f">Primary (facility) loop crosses to the exterior — higher glycol % needed here for freeze protection (see callout below).</text>
+</svg>
+</div>
+
+<h2>Why Two Different Glycol Concentrations, Not One</h2>
+<div class="callout warn">
+Every prior document in this project referenced "50% PG" as if it applies everywhere. It shouldn't. The <strong>secondary loop</strong> (inside the container, CDU to racks) never sees true outdoor ambient — it doesn't need aggressive freeze protection. The <strong>primary loop</strong> is the one exposed outside to the dry cooler, and that's where freeze protection actually has to hold. Recommend explicitly:
+<ul>
+<li><strong>Secondary loop:</strong> DI water or PG25 (matches the OCP BMQC reference fluid already cited) — lower viscosity, better pump efficiency, since it's never exposed to freezing ambient.</li>
+<li><strong>Primary loop:</strong> PG50+ depending on the coldest deployment target — this is the loop the freeze-point chart (still on the open research list) actually needs to size.</li>
+</ul>
+This wasn't explicit in any earlier document in this project — flagging it now so it's a stated design decision, not an accidental one-size assumption.
+</div>
+
+<h2>Sensor &amp; Control Points</h2>
+<div class="callout warn">Architecture pivot (2026-09-28): re-pointed at the Motivair MCDU-25 (positive-pressure) — the vacuum-specific pressure figures below no longer apply. Motivair's own cutsheet doesn't publish sensor-list detail as thoroughly as Chilldyne's did, so this table states general CDU sensor categories rather than vendor-verified specifics; confirm against Motivair's real IOM manual before treating it as final.</div>
+<table>
+<tr><th>Point</th><th>What it measures</th><th>Why it matters here</th></tr>
+<tr><td>Primary/secondary flow meters</td><td>GPM on both sides of the HX</td><td>Confirms the flow-capacity margin computed in <code>check_rack_flow_capacity()</code> is real, not assumed</td></tr>
+<tr><td>Pressure sensors (supply/return)</td><td>Positive-pressure loop, real setpoint TBD from Motivair's spec (Chilldyne's -10 to -22 inHg vacuum figure no longer applies)</td><td>Detects a leak/pressure drop before it becomes a flow problem — feeds the containment-pan/rope trip logic (FMEA 3.1)</td></tr>
+<tr><td>Temp sensors (primary supply/return, secondary supply/return, ambient)</td><td>Loop temps + compartment ambient</td><td><strong>Ambient sensor is the one that catches the CDU-ambient-envelope failures</strong> found in the environmental simulation — this is the trigger point for compartment heating/cooling controls</td></tr>
+<tr><td>Water quality sensor</td><td>Coolant condition</td><td>Feeds the predictive-maintenance alerting from FMEA 5.3, if actually wired to remote monitoring</td></tr>
+</table>
+
+<footer>
+  OCP Mini-Center TCS Loop Schematic — Draft v0.1 — 2026-09-28. Companion to <code>minicenter-basis-of-design.html</code> and <code>minicenter-fmea.html</code>.
+</footer>
+
+</body>
+</html>

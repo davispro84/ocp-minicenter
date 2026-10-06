@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>How This Was Built — AI-Assisted Engineering Process Retrospective</title>
+<style>
+  :root {
+    --ink: #1c1e22; --sub: #55595f; --line: #d8dbe0; --bg-panel: #f7f8fa;
+    --accent: #1a4a78; --warn-bg: #fff6e5; --warn-line: #e8c66b; --ok-bg: #eef7ee; --bad-bg: #fde8e8;
+  }
+  * { box-sizing: border-box; }
+  body { font-family: -apple-system,"Segoe UI",Helvetica,Arial,sans-serif; color:var(--ink); max-width:1040px; margin:0 auto; padding:40px 24px 100px; line-height:1.6; }
+  h1 { font-size: 30px; margin-bottom: 4px; }
+  h2 { font-size: 20px; margin-top: 52px; color: var(--accent); border-bottom: 2px solid var(--line); padding-bottom: 8px; }
+  h3 { font-size: 15.5px; margin-top: 26px; }
+  .status { display:inline-block; background:var(--warn-bg); border:1px solid var(--warn-line); color:#7a5a00; font-size:12.5px; font-weight:600; padding:4px 10px; border-radius:4px; margin-bottom:20px; }
+  .lede { color: var(--sub); font-size: 16px; max-width: 820px; }
+  table { border-collapse: collapse; width: 100%; margin: 14px 0; font-size: 13.5px; }
+  th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; vertical-align: top; }
+  th { background: var(--bg-panel); font-weight: 600; }
+  .callout { background:#eef2f7; border-left:4px solid var(--accent); padding:12px 16px; font-size:14px; margin:16px 0; }
+  .callout.warn { border-left-color: var(--warn-line); background: var(--warn-bg); color:#5a4600; }
+  .callout.good { border-left-color: #1a6b1a; background: var(--ok-bg); color:#1a4b1a; }
+  .pitch { background:#1c1e22; color:#f0f2f5; padding:20px 24px; border-radius:8px; font-size:15px; line-height:1.65; margin:16px 0; }
+  .pitch strong { color:#9ec4e8; }
+  .timeline { border-left: 3px solid var(--line); margin: 20px 0 20px 10px; padding-left: 24px; }
+  .tl-item { position: relative; margin-bottom: 28px; }
+  .tl-item::before { content: ''; position: absolute; left: -31px; top: 4px; width: 11px; height: 11px; border-radius: 50%; background: var(--accent); border: 2px solid #fff; box-shadow: 0 0 0 2px var(--accent); }
+  .tl-date { font-weight: 700; font-size: 13px; color: var(--accent); }
+  .tl-title { font-size: 16px; font-weight: 600; margin: 2px 0 6px; }
+  .tl-body { font-size: 14px; color: var(--ink); }
+  .tl-body p { margin: 6px 0; }
+  .badge { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px; }
+  .badge-good { background: var(--ok-bg); color: #1a6b1a; }
+  .badge-bad { background: var(--bad-bg); color: #a30000; }
+  code { background: #eef0f2; padding: 1px 5px; border-radius: 3px; font-size: 12.5px; }
+  ul, ol { padding-left: 22px; }
+  li { margin-bottom: 7px; }
+  footer { margin-top: 60px; color: var(--sub); font-size: 12px; border-top: 1px solid var(--line); padding-top: 14px; }
+  .doclinks { display:flex; flex-wrap:wrap; gap:10px; margin: 14px 0; }
+  .doclinks a { display:block; background: var(--bg-panel); border:1px solid var(--line); border-radius:6px; padding:8px 12px; font-size:13px; text-decoration:none; color:var(--ink); }
+  .doclinks a:hover { border-color: var(--accent); color: var(--accent); }
+</style>
+</head>
+<body>
+
+<h1>How This Was Built</h1>
+<p class="lede">A straight account of the process behind the OCP Pod / Mini-Center work — from the first automation script to the current design package — written to answer one question directly: <strong>how did you actually make this with AI, and what does that process look like?</strong></p>
+<div class="status">RETROSPECTIVE — DRAFT v0.1 — 2026-10-01. Covers both repos: the original <code>800vdc-ai-pod-automation</code> (pyRevit tool, Sep 11-15) and this one, <code>ocp-minicenter</code> (design package, Sep 28-present).</div>
+
+<h2>1. The 30-Second Version</h2>
+<div class="pitch">
+This started as a pyRevit automation tool that generates and audits an OCP-standard 800VDC data hall pod inside Revit — real OCP engineering specs (Open Rack V3, BMQC liquid-cooling manifold, Diablo 400 DC bus) driving actual Revit geometry, not a mockup. <strong>I built it through live iteration against a real running Revit session</strong> — every bug in the commit history is a real traceback from a real test run, fixed and re-tested, not a guess shipped on faith. Once the tool and its reference design were solid, I used the same AI-assisted process to design a second, commercially-oriented product — a truck-deployable modular AI data center — and <strong>caught six separate fabricated engineering claims</strong> from outside AI tools before they reached a document, logging each one so the discipline is auditable, not just claimed. <strong>The project is still open</strong> — real vendor RFIs are drafted and in flight, CAD hasn't started — but the architecture, failure-mode analysis, and weight/thermal budgets are locked and internally consistent.
+</div>
+
+<h2>2. Timeline</h2>
+<div class="timeline">
+
+<div class="tl-item">
+  <div class="tl-date">2026-09-11 — Day 1</div>
+  <div class="tl-title">Scaffold the automation, then immediately hit real Revit API reality</div>
+  <div class="tl-body">
+    <p>First commit: a pyRevit tool pair, <code>GeneratePod</code> and <code>AuditCompliance</code>, backed by a Revit-independent engineering math library. Within hours, folded in real OCP source documents (BMQC manifold spec, Open Rack V3 base spec) rather than placeholder dimensions — and that real data immediately <strong>surfaced a genuine design tension</strong>: a 130kW rack needs more coolant flow than the reference 12-valve manifold can pass. Not hidden, written directly into the commit message as an open problem.</p>
+    <p>Then: a run of back-to-back live-testing fixes in the same session — IronPython CLR namespace resolution, <code>Element.Name</code> explicit-interface quirks, wrong method signatures — each one a real traceback caught by actually running the tool in Revit, not predicted from documentation.</p>
+  </div>
+</div>
+
+<div class="tl-item">
+  <div class="tl-date">2026-09-11 (later) — Milestone 5</div>
+  <div class="tl-title">Portfolio README, written honestly</div>
+  <div class="tl-body"><p>Added a case-study README the same day — but it cited the <em>actual</em> bugs found during the build (a Transaction double-start, a coordinate semantic mismatch, a feet/inches carryover error) as the AI-acceleration narrative, instead of a generic "AI helped me build this" claim.</p></div>
+</div>
+
+<div class="tl-item">
+  <div class="tl-date">2026-09-14 to 2026-09-15</div>
+  <div class="tl-title">Second and third testing rounds; made the model actually visible</div>
+  <div class="tl-body"><p>More live-session bugs fixed (wrong <code>BuiltInCategory</code> enum spelling, wrong attribute path). Then a direct response to <em>reviewing an actual screenshot</em> of the rendered model — six identical blank boxes, no visual distinction between rack/CDU/busway — closed by adding real materials, distinct cable tray types per bus, and an auto-switching shaded 3D view. Explicitly logged what was <em>not</em> attempted (importing the real STEP CAD file — blocked by Revit's native format support, stated plainly rather than faked).</p></div>
+</div>
+
+<div class="tl-item">
+  <div class="tl-date">~2026-09-25</div>
+  <div class="tl-title">Basis of Design v0.1 for the original 4-rack Pod</div>
+  <div class="tl-body"><p>With the tool working, the design-basis documentation phase began — the 520kW/4-rack, Diablo 400/800VDC, OCP-reference-architecture Pod, written up as a deliberate hyperscale-standards showcase.</p></div>
+</div>
+
+<div class="tl-item">
+  <div class="tl-date">2026-09-28 — The pivot</div>
+  <div class="tl-title">Market-fit research forces a real architecture reversal</div>
+  <div class="tl-body">
+    <p>Checked the 800VDC/Diablo-400/Chilldyne-negative-pressure architecture against what commercial OEM AI hardware (GB200 NVL72-class) actually expects, and found a real incompatibility: those racks take standard AC and convert to DC internally, so a proprietary DC-bus facility can't host them by default. <strong>Rather than defend the sunk design work, the architecture was reversed</strong> — standard 480V AC, OCP BMQC-compliant positive-pressure cooling, Motivair MCDU-25. The original Pod was kept, unmodified, as its own valid hyperscale-showcase design rather than being silently overwritten.</p>
+    <p>Same day: bounded the operating envelope deliberately (-40°C to +48°C) instead of chasing an unbounded "works anywhere on Earth" claim, after climate simulation found real failure points at the planet's extremes and a reasoned argument that extreme remoteness and stranded-power infrastructure are anti-correlated anyway.</p>
+  </div>
+</div>
+
+<div class="tl-item">
+  <div class="tl-date">2026-09-29 — Heaviest day of work</div>
+  <div class="tl-title">Two-skid architecture locked; six fabricated claims caught and rejected</div>
+  <div class="tl-body">
+    <p>Found and fixed a real volumetric constraint (generator + heat rejection + compute doesn't fit one 40ft box at 520kW), split into a two-skid architecture mirroring proven industry (Crusoe-style) practice. Locked the partition wall as a structural spec, SPD sizing, CDU ride-through UPS, weight budget tracker.</p>
+    <p>In the same session, <strong>six separate confident-sounding technical claims from outside AI tools were checked against primary sources and rejected</strong> — a fabricated generator cutsheet quote, an unsourced "live ASHRAE lookup," vendor-brochure-style airflow numbers with no formula shown, a rejected weight figure resurfacing in a later draft, a delivery-timeline conflation, and an attempt to swap out the already-locked CDU vendor with a fabricated product. Every one logged in <code>verification-incidents.md</code> with what made it suspicious and how it was resolved — see Section 5.</p>
+  </div>
+</div>
+
+<div class="tl-item">
+  <div class="tl-date">2026-09-29 (continued) — Split and productize</div>
+  <div class="tl-title">Standalone repo, BOM, executive summary, competitive analysis</div>
+  <div class="tl-body"><p>Split the diverged design out of the original repo into this standalone <code>ocp-minicenter</code> project. Drafted the BOM (every line tagged locked / RFI-gated / illustrative-example — never silently upgraded in status), a customer-facing executive summary, and a competitive analysis against Vertiv/Schneider with two concrete buyer profiles. Caught one more drift issue mid-draft (a delivery-timeline claim conflating site-prep lead time with a never-derived total SLA) before it shipped.</p></div>
+</div>
+
+<div class="tl-item">
+  <div class="tl-date">2026-09-30 to 2026-10-01 — Today</div>
+  <div class="tl-title">Project overview rollup, then this retrospective</div>
+  <div class="tl-body"><p>Built a single-page project overview tying architecture, customer base, and phase-by-phase completion status together — explicitly labeling the progress percentages as planning estimates, not a tracked metric, keeping the checklist as the one authoritative source of truth. This document is the next layer up: the process itself, for the people asking how it was made.</p></div>
+</div>
+
+</div>
+
+<h2>3. What Worked</h2>
+<table>
+<tr><th>Pattern</th><th>Evidence</th></tr>
+<tr><td><strong>Primary sources before design decisions, every time</strong></td><td>Real OCP PDFs (Open Rack V3, BMQC manifold, Diablo 400) were pulled in before geometry was built, not after — and reading them <em>surfaced</em> real design tensions (manifold flow capacity) rather than papering over them.</td></tr>
+<tr><td><strong>Live-testing against the real tool, not predicted behavior</strong></td><td>Every early bugfix commit (Sep 11-15) cites an actual traceback from a real Revit session, not a hypothesized failure mode. Several commits explicitly note a prior fix was "a second unverified guess" and switch to a more certain approach instead of guessing a third time.</td></tr>
+<tr><td><strong>Treating outside-AI-tool output as a lead, never a fact</strong></td><td>Six fabricated or stale claims caught in one session (Section 5) — the pattern was named, logged, and turned into a standing rule in <code>CLAUDE.md</code> rather than relitigated each time it recurred.</td></tr>
+<tr><td><strong>Willingness to reverse a locked decision when the evidence changed</strong></td><td>The entire DC-bus/Chilldyne architecture was reversed on 2026-09-28 after a market-fit check, instead of defending several days of sunk design work.</td></tr>
+<tr><td><strong>Explicit status tagging instead of letting estimates read as facts</strong></td><td>Every BOM line, weight-tracker row, and risk-register item carries a Verified / Estimate / Placeholder / RFI-gated tag — a running habit, not a one-time cleanup pass.</td></tr>
+<tr><td><strong>Bounding claims instead of maximizing them</strong></td><td>The -40°C to +48°C operating envelope and the "days, not years" delivery framing were both deliberately narrowed from a more impressive-sounding but unsupported version.</td></tr>
+<tr><td><strong>Splitting scope when two designs genuinely diverged</strong></td><td>The hyperscale Pod and the commercial Mini-Center were separated into distinct repos on 2026-09-29 instead of forcing one document to serve two incompatible purposes.</td></tr>
+</table>
+
+<h2>4. What Didn't Work / Real Gaps in the Process</h2>
+<table>
+<tr><th>Gap</th><th>What happened</th></tr>
+<tr><td><strong>"Verified" labels drifted out of sync with reality — twice, on the same item</strong></td><td>The ORv3 rack-frame weight was mislabeled "Verified" on two separate passes despite its source never actually being confirmed. The tagging discipline in Section 3 is real, but it isn't self-enforcing — it still needs a periodic audit pass to catch labels that quietly went stale.</td></tr>
+<tr><td><strong>Stale references lingered after a pivot instead of being cleaned up immediately</strong></td><td>Checklist items referencing the removed rectifier/Diablo-400 subsystem survived the 2026-09-28 pivot and weren't caught until a later "routine consistency pass" — a reminder that a big architecture reversal creates cleanup debt elsewhere in the documents that doesn't resolve itself.</td></tr>
+<tr><td><strong>A real contradiction sat unreconciled across two documents for a day</strong></td><td>The FMEA's enclosure rating (IP66) and the checklist's envelope-bounding decision (IP55) disagreed from 2026-09-28 until it was caught and reconciled on 2026-09-29 — two documents describing the same system had quietly diverged.</td></tr>
+<tr><td><strong>Early live-testing cycles sometimes patched the symptom before the root cause</strong></td><td>At least one Sep 11 fix was explicitly noted as not addressing the real cause and had to be redone properly after retesting failed again (the IronPython namespace-resolution bug) — a sign the first fix was shipped a little too fast off one plausible theory.</td></tr>
+<tr><td><strong>The fabrication pattern had to repeat six times before it was fully trusted as a default</strong></td><td>Each incident in Section 5 was individually caught, which is the discipline working — but it took the full run of six before "treat any outside claim as unverified by default" became the standing assumption rather than a case-by-case judgment call.</td></tr>
+</table>
+<div class="callout warn"><strong>The honest throughline:</strong> none of these gaps were caused by the AI tooling being wrong in a way that went undetected — they were caused by documentation and status-tracking lagging behind a fast-moving design, which is a process problem, not a tooling one. The fix in every case was the same: a deliberate consistency/audit pass, not a smarter model.</div>
+
+<h2>5. The Verification Discipline — The Receipts</h2>
+<p>This is the single most citable artifact if anyone asks "how do you know the AI didn't just make things up." Six claims proposed by outside AI tools during the 2026-09-29 session, checked against primary sources, and rejected before they reached a document:</p>
+<table>
+<tr><th>Claim</th><th>Tell</th><th>Resolution</th></tr>
+<tr><td>Generator spec with a specific "&lt;10 second" load-acceptance quote</td><td>No cutsheet link; silently swapped the model number from what was already locked</td><td>Tool confirmed on follow-up it never fetched a real document — rejected</td></tr>
+<tr><td>"Live" ASHRAE climate design-day lookup</td><td>That dataset isn't web-searchable; the number landed suspiciously close to the pre-existing estimate</td><td>Kept as an unsourced estimate, not promoted to verified</td></tr>
+<tr><td>Adiabatic cooler fan count/size/power, presented as calculated</td><td>No formula shown; named vendors already known to gate this exact data</td><td>Replaced with a real first-principles calculation showing the honest, wide uncertainty range</td></tr>
+<tr><td>A specific total skid weight</td><td>Matched an already-rejected calculation almost exactly — it had persisted in context after being thrown out</td><td>Caught before publication, corrected to the real tracked figure</td></tr>
+<tr><td>"We deliver in 8 weeks"</td><td>Conflated the customer's own site-prep lead time with a delivery SLA never actually derived</td><td>Corrected to the already-defensible "days, not years" framing</td></tr>
+<tr><td>A named CDU product proposed to replace the locked vendor, "fully verified"</td><td>Named a real company but a fabricated product line — asked to overwrite a locked decision outright</td><td>Rejected outright; tool confirmed it fabricated the product</td></tr>
+</table>
+<p style="font-size:13px; color:var(--sub)">Full detail with dates in <code>docs/verification-incidents.md</code>. The common tell across all six: a confident, specific-sounding claim with no actual source document attached — the rule that came out of this is to treat any such claim, from any tool, as a lead to check, never a fact to act on.</p>
+
+<h2>6. Current State</h2>
+<p>Architecture, FMEA, weight/thermal budgets, and failure-response logic are locked. Real vendor RFIs are drafted and ready to send (generator timing, Motivair ambient envelope, adiabatic cooler capacity). CAD modeling hasn't started. Full phase-by-phase breakdown lives in <code>minicenter-project-overview.html</code> — not duplicated here on purpose, so there's one place that stays current.</p>
+
+<h2>7. What To Actually Say When Someone Asks</h2>
+<div class="callout good">"I used Claude Code as an engineering collaborator, not an autocomplete — every spec came from a real primary source document, every piece of generated geometry was tested live against the actual tool before being called done, and when I used a second AI tool alongside it, I caught and logged six fabricated technical claims before they reached a document. The process is in the repo: real commit-by-commit bug fixes, a verification-incident log, and a checklist that tracks what's actually decided versus what's still an estimate. It's not finished — real vendor RFIs are in flight — but what's locked is locked for a checkable reason."</div>
+
+<h2>8. Companion Documents</h2>
+<div class="doclinks">
+  <a href="minicenter-project-overview.html">Project Overview →</a>
+  <a href="minicenter-basis-of-design.html">Basis of Design →</a>
+  <a href="minicenter-fmea.html">FMEA →</a>
+  <a href="verification-incidents.md">Verification Incident Log →</a>
+  <a href="minicenter-checklist.md">Master Checklist →</a>
+  <a href="minicenter-executive-summary.html">Executive Summary →</a>
+  <a href="minicenter-competitive-analysis.md">Competitive Analysis →</a>
+</div>
+
+<footer>
+  Build Process Retrospective — Draft v0.1 — generated 2026-10-01, from the real git history of <code>800vdc-ai-pod-automation</code> (21 commits, 2026-09-11 to 2026-09-15) and the documentation/checklist history of <code>ocp-minicenter</code> (2026-09-28 to present). Every timeline entry and incident cited here traces to an actual commit message, checklist entry, or the verification-incident log — nothing in this document is reconstructed from memory alone.
+</footer>
+
+</body>
+</html>

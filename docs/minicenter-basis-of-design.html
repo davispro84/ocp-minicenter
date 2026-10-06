@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>OCP Mini-Center — Container Basis of Design (Draft v0.2)</title>
+<style>
+  :root {
+    --ink: #1c1e22;
+    --sub: #55595f;
+    --line: #d8dbe0;
+    --bg-panel: #f7f8fa;
+    --rack: #3C3C41;
+    --cdu: #4678AA;
+    --feed-a: #C81E1E;
+    --feed-b: #1E963C;
+    --fiber: #E6B428;
+    --warn-bg: #fff6e5;
+    --warn-line: #e8c66b;
+    --ok-bg: #eef7ee;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+    color: var(--ink);
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: 40px 24px 100px;
+    line-height: 1.55;
+  }
+  h1 { font-size: 26px; margin-bottom: 4px; }
+  h2 { font-size: 19px; margin-top: 52px; border-bottom: 1px solid var(--line); padding-bottom: 8px; }
+  h3 { font-size: 15px; margin-top: 28px; color: var(--ink); }
+  .status {
+    display: inline-block;
+    background: var(--warn-bg);
+    border: 1px solid var(--warn-line);
+    color: #7a5a00;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+  }
+  .changelog {
+    background: #eef7ee;
+    border: 1px solid #b9dcb9;
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-size: 13px;
+    margin-bottom: 20px;
+  }
+  .lede { color: var(--sub); font-size: 15px; max-width: 800px; }
+  table { border-collapse: collapse; width: 100%; margin: 16px 0; font-size: 13.5px; }
+  th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; vertical-align: top; }
+  th { background: var(--bg-panel); font-weight: 600; }
+  td.src { color: var(--sub); font-size: 12.5px; }
+  .diagram-wrap {
+    background: var(--bg-panel);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 16px;
+    margin: 16px 0 8px;
+    overflow-x: auto;
+  }
+  .caption { color: var(--sub); font-size: 13px; margin-top: 8px; }
+  .callout {
+    background: #fff;
+    border-left: 4px solid #4678AA;
+    padding: 10px 14px;
+    font-size: 13.5px;
+    margin: 14px 0;
+  }
+  .callout.warn { border-left-color: #e8c66b; background: var(--warn-bg); }
+  .legend { display: flex; gap: 18px; flex-wrap: wrap; font-size: 12.5px; margin-top: 10px; color: var(--sub); }
+  .swatch { display: inline-block; width: 11px; height: 11px; border-radius: 2px; margin-right: 5px; vertical-align: middle; }
+  .risk-open td:first-child { font-weight: 600; }
+  .badge { font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 10px; }
+  .badge-open { background: #fde8e8; color: #a30000; }
+  .badge-decided { background: var(--ok-bg); color: #1a6b1a; }
+  .badge-partial { background: var(--warn-bg); color: #7a5a00; }
+  ol.seq li { margin-bottom: 10px; }
+  code { background: #eef0f2; padding: 1px 5px; border-radius: 3px; font-size: 12.5px; }
+  footer { margin-top: 60px; color: var(--sub); font-size: 12px; border-top: 1px solid var(--line); padding-top: 14px; }
+  .pill-pod { background:#e9edf2; color:#2b3a4a; padding:2px 8px; border-radius:10px; font-size:11.5px; font-weight:700; }
+  .pill-mc { background:#e7f0fa; color:#1a4a78; padding:2px 8px; border-radius:10px; font-size:11.5px; font-weight:700; }
+</style>
+</head>
+<body>
+
+<h1>OCP Mini-Center — Container Basis of Design</h1>
+<div class="status">DRAFT v0.3 — Primary Design tier now targets the 520kW/4-rack Two-Skid Architecture (Section 12). Sections 1-9's diagrams still illustrate the original 260kW/2-rack single-box scale — accurate for the Standard Tier and as a scale reference, not the current Primary Design target. Read Section 12 for the authoritative current state.</div>
+<div class="changelog"><strong>v0.3 changes (2026-09-29):</strong> Primary Design tier scaled to 4 racks/520kW and split into a Two-Skid Architecture (Section 12) after a real volumetric constraint — generator + heat rejection + compute genuinely doesn't fit in one 40ft box at this scale. Sections 1-9 below were NOT redrawn for 4 racks; they remain accurate for the Standard Tier and as terminology/scale references. Diablo 400/Chilldyne pivot (v0.2→) content also updated in place where it appears below.</div>
+<div class="changelog"><strong>Later 2026-09-29 addition:</strong> Skid A partition wall promoted from "implied by FMEA 4.1" to a locked structural spec (Section 12.1) — 3" IMP panel, Roxtec transits, ~R-24 estimate. Product category is locked; exact panel vendor/SKU and the R-value are not — see the open caveat in 12.1.</div>
+<div class="changelog"><strong>v0.2 changes:</strong> added Section 1 (terminology/scale disambiguation) and Section 2 (Pod vs. Mini-Center side-by-side comparison) after v0.1's rack/CDU counts read as ambiguous — every rack/CDU box below is now explicitly labeled as one physical cabinet, with a direct visual contrast against the original (non-container) 4-rack pod design.</div>
+<p class="lede">A truck-deployable, permit-free, cable-termination-commissioned data hall module: 2 individual OCP ORv3 compute rack cabinets plus an N+1 pair of liquid-cooling CDUs, inside a single 40ft High-Cube ISO shipping container, designed to drop next to stranded/onsite power (substation, generator, solar, gas turbine) with minimal site work. <strong>This describes the Standard Tier / original scale — see Section 12 for the current Primary Design (520kW, two-skid).</strong></p>
+
+<h2>1. Terminology — Read This First</h2>
+<p>This project now has <strong>two different designs</strong> living in the same repository. They are easy to conflate, so here's the disambiguation up front:</p>
+<table>
+  <tr><th></th><th><span class="pill-pod">ORIGINAL POD</span></th><th><span class="pill-mc">CONTAINER MINI-CENTER</span></th></tr>
+  <tr>
+    <td>What it is</td>
+    <td>The design already built into this repo's Revit automation (<code>GeneratePod</code>). Not a container design — an open data-hall row.</td>
+    <td><strong>This document.</strong> A new, separate, smaller design specifically sized to fit inside one 40ft shipping container.</td>
+  </tr>
+  <tr>
+    <td>Compute racks</td>
+    <td><strong>4</strong> individual OCP ORv3 cabinets</td>
+    <td><strong>2</strong> individual OCP ORv3 cabinets</td>
+  </tr>
+  <tr>
+    <td>CDUs</td>
+    <td><strong>2</strong> units (OCP Deschutes-class reference, ~500kW each, oversized on purpose for margin)</td>
+    <td><strong>2</strong> units — Chilldyne CF-CDU300, 300kW each, run as an N+1 pair (1 active covers the full load, 1 standby)</td>
+  </tr>
+  <tr>
+    <td>Total IT load</td>
+    <td>4 × 130kW = <strong>520kW</strong></td>
+    <td>2 × 130kW = <strong>260kW</strong></td>
+  </tr>
+  <tr>
+    <td>Envelope</td>
+    <td>Open data hall, overhead A/B busway at 11ft AFF</td>
+    <td>Single 40ft High-Cube container — no overhead busway (not enough ceiling height, see Section 4)</td>
+  </tr>
+  <tr>
+    <td>Repo constants</td>
+    <td><code>RACKS_PER_POD</code>, <code>CDU_UNITS_PER_POD</code></td>
+    <td><code>MINICENTER_RACKS_PER_CONTAINER</code>, <code>MINICENTER_CDU_UNITS</code></td>
+  </tr>
+</table>
+<div class="callout warn"><strong>The rest of this document is about the Container Mini-Center only</strong> (right-hand column above). Every diagram from here on shows <strong>2 rack cabinets, not 4</strong>, and each rack box you'll see is <strong>one physical OCP ORv3 cabinet</strong> — not a multi-cabinet section, not the original pod.</div>
+
+<h2>2. One Rack Cabinet, for Scale</h2>
+<div class="diagram-wrap">
+<svg viewBox="0 0 620 300" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Helvetica,Arial,sans-serif">
+  <!-- single rack elevation -->
+  <rect x="60" y="30" width="90" height="220" fill="#3C3C41" stroke="#1c1e22" stroke-width="1.5"/>
+  <!-- OpenU rung marks (schematic, not all 44 drawn) -->
+  <g stroke="#5a5a60" stroke-width="1">
+    <line x1="60" y1="55" x2="150" y2="55"/>
+    <line x1="60" y1="80" x2="150" y2="80"/>
+    <line x1="60" y1="105" x2="150" y2="105"/>
+    <line x1="60" y1="130" x2="150" y2="130"/>
+    <line x1="60" y1="155" x2="150" y2="155"/>
+    <line x1="60" y1="180" x2="150" y2="180"/>
+    <line x1="60" y1="205" x2="150" y2="205"/>
+    <line x1="60" y1="230" x2="150" y2="230"/>
+  </g>
+  <text x="105" y="270" font-size="11" text-anchor="middle" fill="#1c1e22" font-weight="600">ONE cabinet</text>
+  <text x="105" y="285" font-size="10" text-anchor="middle" fill="#55595f">(this is what a "Rack" box means everywhere below)</text>
+
+  <!-- callouts -->
+  <line x1="150" y1="45" x2="230" y2="45" stroke="#8b9096"/>
+  <text x="235" y="49" font-size="11" fill="#1c1e22">OCP ORv3 frame — 44 OpenU @ 48mm pitch</text>
+
+  <line x1="150" y1="65" x2="230" y2="65" stroke="#8b9096"/>
+  <text x="235" y="69" font-size="11" fill="#1c1e22">600mm W × 1068mm D × 2286mm H</text>
+
+  <line x1="150" y1="85" x2="230" y2="85" stroke="#8b9096"/>
+  <text x="235" y="89" font-size="11" fill="#1c1e22">1400kg max load capacity</text>
+
+  <line x1="150" y1="105" x2="230" y2="105" stroke="#C81E1E"/>
+  <text x="235" y="109" font-size="11" fill="#a30000" font-weight="600">130kW continuous @ 800VDC (±400V rails) = 162.5A</text>
+
+  <line x1="150" y1="230" x2="230" y2="230" stroke="#8b9096"/>
+  <text x="235" y="234" font-size="10.5" fill="#55595f">A Mini-Center uses TWO of these — not a 4-cabinet section</text>
+</svg>
+</div>
+<p class="caption">One box like this = one cabinet. The Mini-Center's plan view (Section 5) shows two of them side by side, plus two CDUs — four physical boxes total inside the container.</p>
+
+<h2>3. Verified Design Basis</h2>
+<table>
+  <tr><th>Element</th><th>Spec</th><th class="src">Source</th></tr>
+  <tr>
+    <td>Compute rack</td>
+    <td>OCP ORv3, 600mm W × 1068mm D × 2286mm H, 44 OpenU, 1400kg max load, 130kW continuous per rack</td>
+    <td class="src">OCP Open Rack Meta Frame V3 Spec Rev 1.3 / Base Spec Rev 1.1 — verified</td>
+  </tr>
+  <tr>
+    <td>DC bus <em>(Original Pod only — see pivot note below)</em></td>
+    <td>±400VDC to COM at full load (800V differential), ±410VDC no-load, ±0.5% steady-state regulation, ±3% transient band</td>
+    <td class="src">OCP "Diablo 400" Base Spec v0.5.2, eff. 30MAY2025 (Microsoft/Meta/Google) — verified</td>
+  </tr>
+  <tr>
+    <td>Mini-Center power architecture <strong>(ARCHITECTURE PIVOT, 2026-09-28)</strong></td>
+    <td>Standard 480V/415V 3-phase AC straight from ATS/PDU to the OEM rack's own power shelves — <strong>no DC bus, no sidecar rectifier of any kind.</strong> Commercial OEM AI racks (e.g. NVIDIA GB200 NVL72-class) take standard AC and convert to DC internally; a proprietary DC-bus facility can't host that hardware. This removes a whole subsystem, not just a different rectifier — see `lib/engineering_math.py`'s Mini-Center section.</td>
+    <td class="src">this project's design choice, post market-fit research</td>
+  </tr>
+  <tr>
+    <td>Rack count &amp; load (Mini-Center only)</td>
+    <td><strong>2 cabinets</strong> × 130kW = <strong>260kW total</strong> — a deliberate design choice, not a footprint limit (see Section 5 note)</td>
+    <td class="src">derived / this project's choice</td>
+  </tr>
+  <tr>
+    <td>Cooling <strong>(ARCHITECTURE PIVOT, 2026-09-28)</strong></td>
+    <td>2× Motivair MCDU-25, unit-level N+1 pair — 625kW single-unit rated capacity each (large margin over the 260kW load, an honest tradeoff vs. the tighter-fitting unit this replaces), 73.625"H×42.5"L×31.5"W, standard OCP BMQC-compliant <strong>positive</strong>-pressure loop, 2 pumps standard per unit, 9.1A FLA @460V/3PH. Replaces a negative-pressure CDU that was incompatible with standard OEM rack quick-disconnects. Leak risk mitigated via welded stainless containment pans + zoned leak-detection rope (auto-trips CDU pumps + ATS), not via vacuum.</td>
+    <td class="src">Motivair MCDU-25 cutsheet — verified vendor doc</td>
+  </tr>
+  <tr>
+    <td>Container envelope</td>
+    <td>40ft High-Cube ISO, 12.03m × 2.35m × 2.69m interior</td>
+    <td class="src">ISO 668 standard dimensions</td>
+  </tr>
+  <tr>
+    <td>Layout</td>
+    <td>Single-loaded row (racks/CDUs backed to one wall), front service aisle only — no face-to-face hot/cold aisle</td>
+    <td class="src">derived from envelope width constraint</td>
+  </tr>
+  <tr>
+    <td>Power distribution</td>
+    <td>PDU-A / PDU-B inside container, each ATS-switched between utility, generator, and/or onsite solar/gas-turbine feed. No overhead busway.</td>
+    <td class="src">this project's design choice</td>
+  </tr>
+</table>
+
+<h2>4. Pod vs. Mini-Center — Side by Side</h2>
+<div class="diagram-wrap">
+<svg viewBox="0 0 900 300" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Helvetica,Arial,sans-serif">
+  <text x="20" y="24" font-size="13" font-weight="700" fill="#2b3a4a">ORIGINAL POD (existing repo — open data hall, not a container)</text>
+  <rect x="20" y="35" width="46" height="46" fill="#3C3C41"/><text x="43" y="62" font-size="9" fill="#fff" text-anchor="middle">Rack1</text>
+  <rect x="66" y="35" width="46" height="46" fill="#3C3C41"/><text x="89" y="62" font-size="9" fill="#fff" text-anchor="middle">Rack2</text>
+  <rect x="112" y="35" width="46" height="46" fill="#4678AA"/><text x="135" y="62" font-size="8.5" fill="#fff" text-anchor="middle">CDU-1</text>
+  <rect x="158" y="35" width="46" height="46" fill="#3C3C41"/><text x="181" y="62" font-size="9" fill="#fff" text-anchor="middle">Rack3</text>
+  <rect x="204" y="35" width="46" height="46" fill="#3C3C41"/><text x="227" y="62" font-size="9" fill="#fff" text-anchor="middle">Rack4</text>
+  <rect x="250" y="35" width="46" height="46" fill="#4678AA"/><text x="273" y="62" font-size="8.5" fill="#fff" text-anchor="middle">CDU-2</text>
+  <text x="20" y="100" font-size="12" fill="#1c1e22"><tspan font-weight="700">4 racks</tspan> + <tspan font-weight="700">2 CDUs</tspan> = 6 cabinets</text>
+  <text x="20" y="118" font-size="12" fill="#1c1e22" font-weight="700">520kW total IT load</text>
+  <text x="20" y="140" font-size="11" fill="#55595f">Overhead A/B busway @ 11ft AFF</text>
+  <text x="20" y="156" font-size="11" fill="#55595f">CDUs run simultaneously (not N+1) — reference-class units, ~2x oversized on purpose</text>
+
+  <line x1="450" y1="20" x2="450" y2="280" stroke="#d8dbe0" stroke-width="2"/>
+
+  <text x="480" y="24" font-size="13" font-weight="700" fill="#1a4a78">CONTAINER MINI-CENTER (this document)</text>
+  <rect x="480" y="35" width="46" height="46" fill="#4678AA"/><text x="503" y="62" font-size="8.5" fill="#fff" text-anchor="middle">CDU-1</text>
+  <rect x="526" y="35" width="46" height="46" fill="#3C3C41"/><text x="549" y="62" font-size="9" fill="#fff" text-anchor="middle">Rack1</text>
+  <rect x="572" y="35" width="46" height="46" fill="#3C3C41"/><text x="595" y="62" font-size="9" fill="#fff" text-anchor="middle">Rack2</text>
+  <rect x="618" y="35" width="46" height="46" fill="#4678AA"/><text x="641" y="62" font-size="8.5" fill="#fff" text-anchor="middle">CDU-2</text>
+  <text x="480" y="100" font-size="12" fill="#1c1e22"><tspan font-weight="700">2 racks</tspan> + <tspan font-weight="700">2 CDUs</tspan> = 4 cabinets</text>
+  <text x="480" y="118" font-size="12" fill="#1c1e22" font-weight="700">260kW total IT load</text>
+  <text x="480" y="140" font-size="11" fill="#55595f">No overhead busway — local PDU-A/B feed instead</text>
+  <text x="480" y="156" font-size="11" fill="#55595f">CDUs run N+1 (1 active covers full load, 1 standby) — tight, honest margin</text>
+  <text x="480" y="178" font-size="11" fill="#55595f">Fits entirely inside one 40ft High-Cube ISO container</text>
+
+  <rect x="20" y="200" width="644" height="78" fill="#fff6e5" stroke="#e8c66b"/>
+  <text x="34" y="220" font-size="11" fill="#7a5a00" font-weight="700">Why only 2 racks, not 4, in the container?</text>
+  <text x="34" y="238" font-size="10.5" fill="#7a5a00">Not floor space — the equipment row uses only ~2.4m of the container's 12m length, room for far more.</text>
+  <text x="34" y="254" font-size="10.5" fill="#7a5a00">It was a deliberate choice to keep the N+1 CDU pair's margin honest (300kW covers 260kW cleanly) and</text>
+  <text x="34" y="270" font-size="10.5" fill="#7a5a00">keep per-container electrical service modest. It's tunable — more racks per container is a real option later.</text>
+</svg>
+</div>
+
+<h2>5. Mini-Center Layout — Plan View</h2>
+<div class="diagram-wrap">
+<svg viewBox="0 0 1000 420" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Helvetica,Arial,sans-serif">
+  <text x="100" y="24" font-size="12" fill="#55595f">40ft High-Cube container — interior 12.03m (39'6") × 2.35m (7'9")</text>
+
+  <!-- container shell -->
+  <rect x="100" y="140" width="842" height="165" fill="#ffffff" stroke="#1c1e22" stroke-width="2"/>
+
+  <!-- equipment row against rear wall -->
+  <rect x="100" y="140" width="43" height="80" fill="#4678AA" stroke="#2c5578"/>
+  <rect x="143" y="140" width="42" height="75" fill="#3C3C41" stroke="#1c1e22"/>
+  <rect x="185" y="140" width="42" height="75" fill="#3C3C41" stroke="#1c1e22"/>
+  <rect x="227" y="140" width="43" height="80" fill="#4678AA" stroke="#2c5578"/>
+
+  <!-- leader lines + labels above -->
+  <line x1="121" y1="140" x2="121" y2="90" stroke="#2c5578"/>
+  <line x1="248" y1="140" x2="248" y2="90" stroke="#2c5578"/>
+  <line x1="121" y1="90" x2="248" y2="90" stroke="#2c5578"/>
+  <text x="184" y="78" font-size="11" text-anchor="middle" fill="#2c5578" font-weight="700">2× Chilldyne CF-CDU300 — 300kW ea., N+1 pair</text>
+
+  <line x1="164" y1="140" x2="164" y2="115" stroke="#1c1e22"/>
+  <line x1="206" y1="140" x2="206" y2="115" stroke="#1c1e22"/>
+  <line x1="164" y1="115" x2="206" y2="115" stroke="#1c1e22"/>
+  <text x="185" y="107" font-size="10.5" text-anchor="middle" fill="#1c1e22" font-weight="700">2× OCP ORv3 racks — 130kW ea. (ONE cabinet each)</text>
+
+  <!-- aisle -->
+  <line x1="270" y1="220" x2="270" y2="305" stroke="#aab0b8" stroke-dasharray="3,3"/>
+  <text x="290" y="250" font-size="11" fill="#55595f">Front service aisle</text>
+  <text x="290" y="264" font-size="10" fill="#8b9096">1.28m (4'2") clear</text>
+
+  <!-- electrical room -->
+  <rect x="270" y="140" width="672" height="165" fill="none" stroke="#aab0b8" stroke-dasharray="4,3"/>
+  <text x="606" y="230" font-size="12" fill="#55595f" text-anchor="middle">Electrical room — PDU-A / PDU-B / ATS / sidecar rectifier</text>
+  <text x="606" y="248" font-size="10.5" fill="#8b9096" text-anchor="middle">~9.6m (31'6") available — plenty of room to spare</text>
+
+  <!-- door -->
+  <rect x="895" y="140" width="30" height="165" fill="#eef0f2" stroke="#8b9096"/>
+  <text x="910" y="320" font-size="10" fill="#55595f" text-anchor="middle">Door</text>
+
+  <!-- dims -->
+  <line x1="100" y1="335" x2="942" y2="335" stroke="#1c1e22" stroke-width="1"/>
+  <text x="521" y="352" font-size="11" text-anchor="middle" fill="#55595f">12.03m (39'6") interior length</text>
+</svg>
+<div class="legend">
+  <span><span class="swatch" style="background:#3C3C41"></span>Compute rack — ONE OCP ORv3 cabinet per box</span>
+  <span><span class="swatch" style="background:#4678AA"></span>CDU — ONE Chilldyne CF-CDU300 per box</span>
+</div>
+</div>
+<p class="caption"><strong>Four physical boxes total: 2 racks, 2 CDUs.</strong> The equipment row uses ~2.4m of the container's 12.03m length — footprint was never the constraint (see the note in Section 4).</p>
+
+<h2>6. Section View at Rack Row</h2>
+<div class="diagram-wrap">
+<svg viewBox="0 0 300 240" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Helvetica,Arial,sans-serif">
+  <rect x="70" y="40" width="118" height="135" fill="#ffffff" stroke="#1c1e22" stroke-width="2"/>
+  <text x="70" y="28" font-size="11" fill="#55595f">Container interior, cross-section at rack row</text>
+
+  <rect x="70" y="61" width="53" height="114" fill="#3C3C41"/>
+  <text x="96" y="122" font-size="9" fill="#fff" text-anchor="middle">Rack</text>
+  <text x="96" y="134" font-size="8" fill="#dcdcdc" text-anchor="middle">2.286m (7'6")</text>
+
+  <line x1="70" y1="40" x2="123" y2="40" stroke="#C81E1E" stroke-width="1"/>
+  <line x1="70" y1="61" x2="123" y2="61" stroke="#C81E1E" stroke-width="1" stroke-dasharray="2,2"/>
+  <text x="128" y="53" font-size="9.5" fill="#C81E1E">only 0.4m (16") clearance above rack</text>
+
+  <text x="145" y="165" font-size="9.5" fill="#55595f">Front aisle</text>
+  <text x="145" y="177" font-size="8.5" fill="#8b9096">1.28m (4'2")</text>
+
+  <line x1="40" y1="40" x2="40" y2="175" stroke="#1c1e22"/>
+  <text x="30" y="110" font-size="9.5" fill="#55595f" text-anchor="middle" transform="rotate(-90 30,110)">2.69m (8'10") interior height</text>
+
+  <line x1="70" y1="200" x2="188" y2="200" stroke="#1c1e22"/>
+  <text x="129" y="215" font-size="9.5" fill="#55595f" text-anchor="middle">2.35m (7'9") interior width</text>
+</svg>
+</div>
+<p class="caption"><strong>This is why there's no overhead busway in the Mini-Center.</strong> Only 16 inches of ceiling clearance exists above the rack — nowhere near what an overhead busway/fiber stack needs. Local PDU-A/B whips replace it. It's also why this is a single-loaded row: 2.35m of width can't fit a real double-loaded hot/cold aisle (that needs 48"+42"+42" ≈ 3.35m).</p>
+
+<h2>7. Deployment Concept — Stacked Modules</h2>
+<div class="diagram-wrap">
+<svg viewBox="0 0 320 260" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Helvetica,Arial,sans-serif">
+  <rect x="60" y="30" width="200" height="80" fill="#eef2f7" stroke="#1c1e22" stroke-width="2"/>
+  <text x="160" y="60" font-size="11" text-anchor="middle" fill="#1c1e22" font-weight="600">Compute / Cooling Module</text>
+  <text x="160" y="76" font-size="9.5" text-anchor="middle" fill="#55595f">2 racks + CDU-1/CDU-2 (N+1)</text>
+  <text x="160" y="90" font-size="9.5" text-anchor="middle" fill="#55595f">260kW load</text>
+  <rect x="55" y="25" width="10" height="10" fill="#8b9096"/>
+  <rect x="255" y="25" width="10" height="10" fill="#8b9096"/>
+  <rect x="55" y="105" width="10" height="10" fill="#8b9096"/>
+  <rect x="255" y="105" width="10" height="10" fill="#8b9096"/>
+
+  <rect x="60" y="112" width="200" height="16" fill="#fff6e5" stroke="#e8c66b"/>
+  <text x="160" y="123" font-size="8.5" text-anchor="middle" fill="#7a5a00">Field interconnect: power A/B + coolant supply/return + fiber</text>
+
+  <rect x="60" y="128" width="200" height="80" fill="#eef2f7" stroke="#1c1e22" stroke-width="2"/>
+  <text x="160" y="158" font-size="11" text-anchor="middle" fill="#1c1e22" font-weight="600">Power / Electrical Module</text>
+  <text x="160" y="174" font-size="9.5" text-anchor="middle" fill="#55595f">PDU-A/B, ATS, sidecar rectifier</text>
+  <text x="160" y="188" font-size="9.5" text-anchor="middle" fill="#55595f">heaviest equipment — ground level</text>
+  <rect x="55" y="123" width="10" height="10" fill="#8b9096"/>
+  <rect x="255" y="123" width="10" height="10" fill="#8b9096"/>
+  <rect x="55" y="203" width="10" height="10" fill="#8b9096"/>
+  <rect x="255" y="203" width="10" height="10" fill="#8b9096"/>
+
+  <line x1="30" y1="215" x2="290" y2="215" stroke="#1c1e22" stroke-width="2"/>
+  <text x="160" y="232" font-size="9.5" text-anchor="middle" fill="#55595f">Site slab / grade</text>
+</svg>
+</div>
+<p class="caption">Corner-post stacking carries the top module's weight to grade — not through the ground module's roof or floor — so heavy switchgear/rectifier equipment belongs at ground level regardless of stacking. Field interconnection is a handful of quick-connects made after the crane sets the top module, not a construction task.</p>
+
+<h2>8. Power Architecture</h2>
+<div class="diagram-wrap">
+<svg viewBox="0 0 760 220" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Helvetica,Arial,sans-serif">
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#55595f"/></marker>
+  </defs>
+  <rect x="10" y="10" width="110" height="34" fill="#eef0f2" stroke="#55595f"/>
+  <text x="65" y="31" font-size="10.5" text-anchor="middle">Utility Grid</text>
+  <rect x="10" y="55" width="110" height="34" fill="#eef0f2" stroke="#55595f"/>
+  <text x="65" y="76" font-size="10.5" text-anchor="middle">Generator</text>
+  <rect x="10" y="100" width="110" height="34" fill="#eef0f2" stroke="#55595f"/>
+  <text x="65" y="121" font-size="10.5" text-anchor="middle">Solar / Onsite Gen</text>
+
+  <line x1="120" y1="27" x2="180" y2="60" stroke="#55595f" marker-end="url(#arrow)"/>
+  <line x1="120" y1="72" x2="180" y2="65" stroke="#55595f" marker-end="url(#arrow)"/>
+  <line x1="120" y1="117" x2="180" y2="72" stroke="#55595f" marker-end="url(#arrow)"/>
+
+  <rect x="182" y="45" width="80" height="40" fill="#fff6e5" stroke="#e8c66b"/>
+  <text x="222" y="69" font-size="11" text-anchor="middle" font-weight="600">ATS</text>
+
+  <line x1="262" y1="55" x2="320" y2="30" stroke="#C81E1E" marker-end="url(#arrow)"/>
+  <line x1="262" y1="75" x2="320" y2="100" stroke="#1E963C" marker-end="url(#arrow)"/>
+
+  <rect x="322" y="10" width="90" height="40" fill="#fde8e8" stroke="#C81E1E"/>
+  <text x="367" y="34" font-size="11" text-anchor="middle" font-weight="600" fill="#a30000">PDU-A</text>
+  <rect x="322" y="80" width="90" height="40" fill="#eaf5ea" stroke="#1E963C"/>
+  <text x="367" y="104" font-size="11" text-anchor="middle" font-weight="600" fill="#1a6b1a">PDU-B</text>
+
+  <line x1="412" y1="30" x2="480" y2="35" stroke="#C81E1E" marker-end="url(#arrow)"/>
+  <line x1="412" y1="100" x2="480" y2="95" stroke="#1E963C" marker-end="url(#arrow)"/>
+
+  <rect x="482" y="15" width="130" height="40" fill="#3C3C41"/>
+  <text x="547" y="39" font-size="10.5" text-anchor="middle" fill="#fff">Rack 1 (OEM cabinet)</text>
+  <rect x="482" y="80" width="130" height="40" fill="#3C3C41"/>
+  <text x="547" y="104" font-size="10.5" text-anchor="middle" fill="#fff">Rack 2 (OEM cabinet)</text>
+
+  <text x="10" y="160" font-size="10" fill="#55595f">ARCHITECTURE PIVOT (2026-09-28): no DC bus, no sidecar rectifier — standard 480V/415V AC flows straight from PDU-A/B</text>
+  <text x="10" y="176" font-size="10" fill="#55595f">to the OEM rack's own power shelves, which do their own AC/DC conversion internally (e.g. GB200 NVL72-class hardware).</text>
+  <text x="10" y="200" font-size="10" fill="#55595f">Each rack fed A/B for redundancy. Diablo 400's ±400VDC bus stays the Original Pod's architecture — not used here.</text>
+</svg>
+</div>
+
+<h2>9. Cooling Architecture</h2>
+<div class="diagram-wrap">
+<svg viewBox="0 0 620 190" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Helvetica,Arial,sans-serif">
+  <defs>
+    <marker id="arrow2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#55595f"/></marker>
+  </defs>
+  <rect x="10" y="15" width="90" height="40" fill="#3C3C41"/>
+  <text x="55" y="39" font-size="10.5" text-anchor="middle" fill="#fff">Rack 1</text>
+  <rect x="10" y="95" width="90" height="40" fill="#3C3C41"/>
+  <text x="55" y="119" font-size="10.5" text-anchor="middle" fill="#fff">Rack 2</text>
+  <text x="55" y="75" font-size="9" text-anchor="middle" fill="#55595f">TCS loop</text>
+
+  <line x1="100" y1="35" x2="150" y2="55" stroke="#55595f" marker-end="url(#arrow2)"/>
+  <line x1="100" y1="115" x2="150" y2="65" stroke="#55595f" marker-end="url(#arrow2)"/>
+
+  <rect x="152" y="25" width="110" height="45" fill="#4678AA"/>
+  <text x="207" y="42" font-size="10.5" text-anchor="middle" fill="#fff">CDU-1 (active)</text>
+  <text x="207" y="56" font-size="8.5" text-anchor="middle" fill="#dbe8f2">Motivair MCDU-25</text>
+  <text x="207" y="68" font-size="8.5" text-anchor="middle" fill="#dbe8f2">625kW, N of N+1</text>
+
+  <rect x="152" y="80" width="110" height="45" fill="#8fa9c2" stroke="#4678AA" stroke-dasharray="4,3"/>
+  <text x="207" y="97" font-size="10.5" text-anchor="middle" fill="#233">CDU-2 (standby)</text>
+  <text x="207" y="111" font-size="8.5" text-anchor="middle" fill="#345">+1 redundant</text>
+  <text x="207" y="122" font-size="8.5" text-anchor="middle" fill="#345">2 pumps/unit standard</text>
+
+  <line x1="262" y1="47" x2="330" y2="70" stroke="#55595f" marker-end="url(#arrow2)"/>
+
+  <rect x="332" y="45" width="150" height="50" fill="none" stroke="#e8c66b" stroke-width="2" stroke-dasharray="6,4"/>
+  <text x="407" y="68" font-size="10.5" text-anchor="middle" fill="#7a5a00" font-weight="600">Heat Rejection</text>
+  <text x="407" y="83" font-size="9" text-anchor="middle" fill="#7a5a00">TBD — dry cooler vs. adiabatic (open decision)</text>
+
+  <text x="10" y="150" font-size="9.5" fill="#55595f">ARCHITECTURE PIVOT (2026-09-28): standard OCP BMQC-compliant POSITIVE-pressure loop, Motivair MCDU-25 — 625kW single-unit</text>
+  <text x="10" y="164" font-size="9.5" fill="#55595f">capacity vs. 260kW load is a real oversizing tradeoff (no tighter-fitting standard model exists), but buys standard-connector</text>
+  <text x="10" y="178" font-size="9.5" fill="#55595f">compatibility with OEM racks. Leak risk mitigated via welded containment pans + zoned leak-detection rope, not vacuum.</text>
+</svg>
+</div>
+
+<h2>10. Open Decisions — Risk Register</h2>
+<table class="risk-open">
+  <tr><th>Item</th><th>Status</th><th>Why it matters</th><th>Recommended next action</th></tr>
+  <tr>
+    <td>~~Pressure architecture (Chilldyne negative vs. OCP BMQC positive)~~</td>
+    <td><span class="badge badge-decided">RESOLVED 2026-09-28</span></td>
+    <td>Resolved by market-fit research, not by re-examining the original ambient-envelope angle: OEM AI racks expect standard positive-pressure quick-disconnects</td>
+    <td>Positive-pressure adopted (Motivair MCDU-25) — see `engineering_math.py`'s Mini-Center pivot note</td>
+  </tr>
+  <tr>
+    <td>Motivair MCDU-25 ambient operating envelope</td>
+    <td><span class="badge badge-open">OPEN — new</span></td>
+    <td>The whole 3-tier Climate-Kit strategy was sized against Chilldyne's 5–40°C spec; checked the real Motivair cutsheet directly and it publishes no ambient rating at all — that number no longer has a source</td>
+    <td>Check Motivair's IOM/installation manual, or derive from the PLC/VFD components' own industrial ratings</td>
+  </tr>
+  <tr>
+    <td>Heat rejection device</td>
+    <td><span class="badge badge-open">OPEN</span></td>
+    <td>Closes the last unknown in container envelope/weight; determines hot-climate performance</td>
+    <td>Get real dry-cooler/adiabatic cutsheets sized against ASHRAE 0.4% design-day data</td>
+  </tr>
+  <tr>
+    <td>Weight take-off vs. road-legal limits</td>
+    <td><span class="badge badge-open">OPEN</span></td>
+    <td>"No special permits" is currently a goal, not a verified outcome</td>
+    <td>Total real component weights once heat rejection + PDU/rectifier hardware are picked</td>
+  </tr>
+  <tr>
+    <td>Floor-load reinforcement for concentrated rack point-loads</td>
+    <td><span class="badge badge-open">OPEN</span></td>
+    <td>Stock container floors aren't rated for a 1400kg rack on a 0.6×1.07m footprint</td>
+    <td>Structural pass once rack/CDU final positions are locked</td>
+  </tr>
+  <tr>
+    <td>Rack / DC bus / AC input electrical basis</td>
+    <td><span class="badge badge-decided">VERIFIED</span></td>
+    <td>—</td>
+    <td>Locked — see Section 3</td>
+  </tr>
+  <tr>
+    <td>CDU selection &amp; N+1 sizing</td>
+    <td><span class="badge badge-partial">PARTIAL</span></td>
+    <td>Real vendor unit picked and sized correctly, but pressure-architecture decision above could still change this</td>
+    <td>Confirm after Item 1 is resolved</td>
+  </tr>
+</table>
+
+<h2>11. Recommended Sequencing</h2>
+<ol class="seq">
+  <li><strong>Resolve pressure architecture.</strong> Pick Chilldyne-style negative pressure (leak-safe, but a new connector standard) or stay OCP BMQC-compliant (industry-standard, but pressurized-leak risk in an unmanned site). This is the highest-leverage, lowest-cost decision left.</li>
+  <li><strong>Size heat rejection</strong> against real regional design-day data — likely results in a "cold-climate kit" (dry cooler only) and "hot-climate kit" (dry cooler + adiabatic pre-cool stage) rather than one universal design.</li>
+  <li><strong>Real weight take-off</strong> once 1–2 are locked, checked against ISO CSC ratings and federal road-legal gross weight.</li>
+  <li><strong>Begin Revit/CAD geometry</strong> for the container variant — new family placement logic (single-loaded row, no overhead busway), separate from the existing 4-rack pod script.</li>
+  <li><strong>Structural floor reinforcement design</strong> once rack/CDU positions are final.</li>
+</ol>
+
+<h2>12. Primary Design (520kW) — Two-Skid Architecture (CURRENT, 2026-09-29)</h2>
+<p class="lede">The Primary Design tier scaled from 2 to 4 racks (260kW → 520kW), using the exact same N+1 Motivair MCDU-25 pair — 625kW capacity against a 520kW load is a ~17% N+1 margin, far more capital-efficient than the original 2-rack design's ~140% margin. This does not fit in one 40ft box: a 5.8m generator plus a ~4.5m compute row leaves only 1.7m for switchgear, a real checked constraint, not a judgment call. Split into two skids, mirroring already-proven industry (Crusoe-style) multi-skid deployment practice rather than inventing a new scheme.</p>
+
+<div class="diagram-wrap">
+<svg viewBox="0 0 900 320" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Helvetica,Arial,sans-serif">
+  <defs>
+    <marker id="af3" markerWidth="9" markerHeight="9" refX="7" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="#55595f"/></marker>
+  </defs>
+
+  <text x="20" y="24" font-size="13" font-weight="700" fill="#1a4a78">SKID A — Compute (40ft High-Cube container)</text>
+  <rect x="20" y="35" width="400" height="120" fill="#eef2f7" stroke="#1c1e22" stroke-width="2"/>
+  <rect x="35" y="50" width="40" height="60" fill="#3C3C41"/><text x="55" y="118" font-size="8" text-anchor="middle">Rack1</text>
+  <rect x="80" y="50" width="40" height="60" fill="#3C3C41"/><text x="100" y="118" font-size="8" text-anchor="middle">Rack2</text>
+  <rect x="125" y="50" width="40" height="60" fill="#3C3C41"/><text x="145" y="118" font-size="8" text-anchor="middle">Rack3</text>
+  <rect x="170" y="50" width="40" height="60" fill="#3C3C41"/><text x="190" y="118" font-size="8" text-anchor="middle">Rack4</text>
+  <rect x="215" y="50" width="35" height="65" fill="#4678AA"/><text x="232" y="120" font-size="8" text-anchor="middle">CDU-1</text>
+  <rect x="255" y="50" width="35" height="65" fill="#4678AA"/><text x="272" y="120" font-size="8" text-anchor="middle">CDU-2</text>
+  <text x="150" y="135" font-size="9" text-anchor="middle" fill="#55595f">520kW IT load, 1200A switchgear/ATS, 10kVA Aux UPS, IMP partition</text>
+  <rect x="310" y="50" width="90" height="60" fill="#fde8e8" stroke="#C81E1E"/>
+  <text x="355" y="75" font-size="8.5" text-anchor="middle">1200A</text>
+  <text x="355" y="88" font-size="8.5" text-anchor="middle">Switchgear</text>
+  <text x="355" y="101" font-size="8.5" text-anchor="middle">+ ATS</text>
+
+  <line x1="420" y1="95" x2="480" y2="95" stroke="#55595f" stroke-width="2" marker-end="url(#af3)"/>
+  <text x="450" y="80" font-size="8" text-anchor="middle" fill="#55595f">Cam-Lok</text>
+  <line x1="420" y1="115" x2="480" y2="115" stroke="#4678AA" stroke-width="2" marker-end="url(#af3)"/>
+  <text x="450" y="130" font-size="8" text-anchor="middle" fill="#4678AA">3" Victaulic</text>
+  <line x1="420" y1="75" x2="480" y2="75" stroke="#8b9096" stroke-width="1" stroke-dasharray="3,2" marker-end="url(#af3)"/>
+  <text x="450" y="65" font-size="7.5" text-anchor="middle" fill="#8b9096">Amphenol/MIL-spec PLC</text>
+
+  <text x="500" y="24" font-size="13" font-weight="700" fill="#7a5a00">SKID B — Mechanical/Power (standard flatbed)</text>
+  <rect x="500" y="35" width="380" height="120" fill="#fff6e5" stroke="#e8c66b" stroke-width="2"/>
+  <rect x="515" y="55" width="150" height="80" fill="#eef0f2" stroke="#1c1e22"/>
+  <text x="590" y="90" font-size="10" text-anchor="middle">600kW-class</text>
+  <text x="590" y="103" font-size="10" text-anchor="middle">Generator</text>
+  <text x="590" y="116" font-size="8" text-anchor="middle" fill="#55595f">MD600/SG600</text>
+  <rect x="685" y="55" width="175" height="80" fill="#eef0f2" stroke="#1c1e22"/>
+  <text x="772" y="90" font-size="10" text-anchor="middle">550kW Adiabatic</text>
+  <text x="772" y="103" font-size="10" text-anchor="middle">V-Coil Cooler</text>
+  <text x="772" y="116" font-size="8" text-anchor="middle" fill="#55595f">vendor TBD, placeholder</text>
+
+  <text x="20" y="185" font-size="10" fill="#55595f">Site-mated after crane placement: Cam-Lok power cables (paralleled per phase for 1200A total), 3" grooved Victaulic fluid</text>
+  <text x="20" y="200" font-size="10" fill="#55595f">couplings, ruggedized Amphenol/MIL-spec multi-pin PLC handshake. Deliberately mirrors proven Crusoe-style multi-skid practice.</text>
+  <text x="20" y="220" font-size="10" fill="#7a5a00">Structural/leak-mitigation risk profile now split by skid: Skid A keeps wire-rope isolation + containment pan (vibration-sensitive</text>
+  <text x="20" y="235" font-size="10" fill="#7a5a00">electronics); Skid B needs only rigid flatbed tie-downs (heavy iron) — a leak there is an environmental concern, not IT life-safety.</text>
+</svg>
+</div>
+<p class="caption">Standard Tier (lower-density rural/edge, 10-30kW/rack) never needed a 600kW-class generator and stays a true single-box design — this split is specific to the Primary tier at 520kW scale.</p>
+
+<div class="callout warn"><strong>LOCKED LAYOUT CONSTRAINT (2026-09-29), mandatory for CAD</strong>: Skid A's 480VAC distribution (1200A switchgear, busway) must be routed overhead, physically isolated from the underfloor fluid containment pan's drainage path. This is not a preference — it's the entire basis for the two-stage leak-response logic in FMEA 3.1 (leak rope kills pumps only; a separate smoke/fire detector, not the leak rope, trips the main breaker). If busway and fluid piping ever share an elevation or zone, that safety logic breaks. Any CAD layout of Skid A must enforce this separation explicitly, not assume it.</div>
+
+<h3>12.1 Skid A Partition Wall — Structural Spec (LOCKED 2026-09-29)</h3>
+<p class="lede">Promoted from "implied by FMEA 4.1" to a locked structural element — the climate-kit sizing (checklist Phase 1) and FMEA 4.1's IP66/MERV13 dust isolation both depend on this being a real rated barrier, not an assumed one.</p>
+<table>
+  <tr><th>Element</th><th>Spec</th><th class="src">Basis</th></tr>
+  <tr>
+    <td>Construction</td>
+    <td>3" (75mm) Insulated Metal Panel (IMP) — closed-cell polyiso (PIR) foam core between 26-gauge galvanized steel skins</td>
+    <td class="src">Design decision (standard IMP product category) — not a vendor-specific claim requiring a cutsheet</td>
+  </tr>
+  <tr>
+    <td>Mounting</td>
+    <td>Bolted to the ISO container's corrugated sidewall/roof via welded angle-iron tracks; load-bearing, sized to carry the differential pressure from FMEA 4.1's positive-pressure intake fans</td>
+    <td class="src">Design decision</td>
+  </tr>
+  <tr>
+    <td>Penetrations</td>
+    <td>All Victaulic fluid lines and 480V Cam-Lok/busway runs through the wall sealed with Roxtec modular compression transits — no spray foam, no field caulk</td>
+    <td class="src">Design decision (standard cable/pipe-transit product category)</td>
+  </tr>
+  <tr>
+    <td>Thermal / ingress rating</td>
+    <td>~R-24 thermal break (3" polyiso at its typical ~R-7-8/in — an estimate from the material category, not a vendor-specific published value). Maintains <strong>IP66/MERV13-16</strong> for this compartment specifically — a deliberate, stricter internal spec than the overall container envelope's IP55/MERV13 (see checklist Phase 1 envelope-bounding decision), because the switchgear/PLC/VFD electronics behind this wall are higher-consequence than general dust tolerance. Reconciled 2026-09-29 — FMEA 4.1 previously read IP66 for the whole enclosure, which had drifted out of sync with the envelope decision; now stated as an explicit two-tier spec instead of a silent contradiction.</td>
+    <td class="src">Estimate from material class — flag if a specific panel product's tested R-value is sourced later. IP66-vs-IP55 tiering is a judgment call, not independently confirmed as the intended framing.</td>
+  </tr>
+</table>
+<div class="callout warn"><strong>Not yet resolved</strong>: exact panel product/vendor is unselected (this spec constrains the product category, not a specific SKU); the R-24 figure is a material-class estimate, not a tested value — re-verify once a real panel product is chosen.</div>
+
+<footer>
+  OCP Mini-Center Basis of Design — Draft v0.3 — generated 2026-09-25, updated 2026-09-29 from verified primary sources (OCP Diablo 400 v0.5.2, OCP Project Deschutes v0.8.0, Motivair MCDU-25 cutsheet, Generac MD600/SG600 cutsheets) plus this project's own engineering derivations. See <code>CLAUDE.md</code> and <code>lib/engineering_math.py</code> in the repository for the full citation ledger and computed constants.
+</footer>
+
+</body>
+</html>

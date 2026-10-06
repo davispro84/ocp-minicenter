@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>OCP Mini-Center — Project Overview</title>
+<style>
+  :root {
+    --ink: #1c1e22;
+    --sub: #55595f;
+    --line: #d8dbe0;
+    --bg-panel: #f7f8fa;
+    --accent: #1a4a78;
+    --warn-bg: #fff6e5;
+    --warn-line: #e8c66b;
+    --ok-bg: #eef7ee;
+    --bad-bg: #fde8e8;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+    color: var(--ink);
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: 40px 24px 100px;
+    line-height: 1.6;
+  }
+  h1 { font-size: 30px; margin-bottom: 4px; }
+  h2 { font-size: 20px; margin-top: 52px; color: var(--accent); border-bottom: 2px solid var(--line); padding-bottom: 8px; }
+  h3 { font-size: 15px; margin-top: 26px; }
+  .status { display:inline-block; background:var(--warn-bg); border:1px solid var(--warn-line); color:#7a5a00; font-size:12.5px; font-weight:600; padding:4px 10px; border-radius:4px; margin-bottom:20px; }
+  .lede { color: var(--sub); font-size: 16px; max-width: 820px; }
+  table { border-collapse: collapse; width: 100%; margin: 14px 0; font-size: 13.5px; }
+  th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; vertical-align: top; }
+  th { background: var(--bg-panel); font-weight: 600; }
+  .callout { background:#eef2f7; border-left:4px solid var(--accent); padding:10px 14px; font-size:14px; margin:14px 0; }
+  .callout.warn { border-left-color: var(--warn-line); background: var(--warn-bg); color:#5a4600; }
+  .badge { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px; white-space: nowrap; }
+  .badge-open { background: var(--bad-bg); color: #a30000; }
+  .badge-decided { background: var(--ok-bg); color: #1a6b1a; }
+  .badge-partial { background: var(--warn-bg); color: #7a5a00; }
+  .badge-none { background: #eef0f2; color: #55595f; }
+  .bar-track { background: #eef0f2; border-radius: 6px; height: 14px; width: 100%; overflow: hidden; border: 1px solid var(--line); }
+  .bar-fill { background: linear-gradient(90deg, #4678AA, #1a4a78); height: 100%; }
+  .phase-row td:first-child { font-weight: 600; white-space: nowrap; }
+  .pct { font-size: 12px; color: var(--sub); white-space: nowrap; }
+  ul, ol { padding-left: 22px; }
+  li { margin-bottom: 6px; }
+  code { background: #eef0f2; padding: 1px 5px; border-radius: 3px; font-size: 12.5px; }
+  footer { margin-top: 60px; color: var(--sub); font-size: 12px; border-top: 1px solid var(--line); padding-top: 14px; }
+  .doclinks { display:flex; flex-wrap:wrap; gap:10px; margin: 14px 0; }
+  .doclinks a { display:block; background: var(--bg-panel); border:1px solid var(--line); border-radius:6px; padding:8px 12px; font-size:13px; text-decoration:none; color:var(--ink); }
+  .doclinks a:hover { border-color: var(--accent); color: var(--accent); }
+</style>
+</head>
+<body>
+
+<h1>OCP Mini-Center — Project Overview</h1>
+<p class="lede">A truck-deployable, 520kW modular AI compute facility for stranded power sites — the single document that ties design basis, architecture, target customer, and current project status together in one place.</p>
+<div class="status">OVERVIEW — DRAFT v0.1 — 2026-09-30. Rolls up the companion documents below; not a replacement for any of them.</div>
+
+<h2>1. What This Project Is</h2>
+<p>A two-skid, crane-set, cable-terminated data hall module built to deploy in days at sites that already have power but no facility to use it — flare-gas pads, curtailed renewable interconnects, decommissioned industrial substations. It hosts standard commercial OEM AI hardware (GB200 NVL72-class racks) on standard 480V/415V 3-phase AC and OCP BMQC-compliant positive-pressure liquid cooling — no proprietary DC bus to qualify hardware against.</p>
+<div class="callout">This is the <strong>Primary Design tier</strong> (520kW / 4-rack, two-skid). A lower-density <strong>Standard Tier</strong> (10-30kW/rack, rural telecom/SCADA/rugged compute, single-box, air- or DX-cooled) shares the same container shell, electrical room, climate kits, and shock-isolated sub-floor, differing only in the compute-room payload. A separate, still-valid project — the original 4-rack <strong>OCP Pod</strong> (Diablo 400 / 800VDC bus, hyperscale reference architecture) — lives in a different repo and was never superseded by this one; the two just diverged into different design spaces.</div>
+
+<h2>2. Architecture — The Two Skids</h2>
+<p>Splitting into two skids was forced by a real volumetric constraint, not a preference: a 600kW-class generator plus a 4.5m compute row leaves only 1.7m for switchgear inside a single 40ft box. The split deliberately mirrors already-proven industry practice (Crusoe-style stranded-power deployment).</p>
+<table>
+<tr><th>Skid</th><th>Contents</th><th>Weight</th><th>Foundation</th></tr>
+<tr><td><strong>Skid A</strong> — Compute<br><span class="pct">40ft High-Cube container</span></td><td>4× OCP ORv3 racks (520kW), 2× Motivair MCDU-25 CDUs (N+1, 625kW), 1200A switchgear/ATS, 10kVA Li-ion Aux UPS, IMP partition wall</td><td>~14,100 kg (~31,100 lb)<br><span class="pct">~6,300kg margin to truck limit</span></td><td>Level 45'×12' pad or 4 frost-depth piers</td></tr>
+<tr><td><strong>Skid B</strong> — Power/Mechanical<br><span class="pct">standard flatbed</span></td><td>600kW-class generator (MD600/SG600), 550kW adiabatic V-coil fluid cooler</td><td>~13,348 kg (~29,420 lb)<br><span class="pct">~7,050kg margin — generator weight unverified</span></td><td>Standard 40'×10' pad</td></tr>
+</table>
+<p>Site-mated after crane placement via 1200A Cam-Lok power cables (paralleled per phase), 3" grooved Victaulic fluid couplings, and a ruggedized Amphenol/MIL-spec multi-pin PLC handshake.</p>
+<table>
+<tr><th>Parameter</th><th>Spec</th></tr>
+<tr><td>Operating envelope</td><td>-40°C to +48°C ambient, altitude derate above 4,000ft</td></tr>
+<tr><td>Enclosure rating</td><td>IP55/MERV13 overall container; IP66/MERV13-16 for the electrical/CDU compartment behind the partition wall</td></tr>
+<tr><td>Hot-climate margin</td><td>Adiabatic pre-cool → ~30-32°C fluid supply at Phoenix-class design conditions, vs. the CDU's 45°C max limit</td></tr>
+<tr><td>Cold-climate protection</td><td>Dowfrost PG60 primary loop, protects to ~-48°C (verified against Dow's published freeze-point chart)</td></tr>
+<tr><td>Explicitly out of scope</td><td>Sahara-grade sandstorm conditions, sub-PG60 extreme cold — a bounded envelope, not an unbounded "works anywhere" claim</td></tr>
+</table>
+
+<h2>3. Who This Is For</h2>
+<p>Two specific buyer profiles — not general enterprise IT or colocation — positioned against incumbents (Vertiv SmartMod, Schneider EcoStruxure) whose modular DC products assume an existing, prepared campus (central chilled-water plant, large utility drop, monolithic slab) and typically top out around 10-20kW/rack air-cooled.</p>
+<table>
+<tr><th>Profile</th><th>Who</th><th>The need</th><th>The pitch</th></tr>
+<tr><td><strong>A — Neo-Cloud AI Operator</strong></td><td>Crusoe/CoreWeave-adjacent</td><td>Capital + compute demand, bottlenecked by multi-year utility interconnection queues</td><td>520kW of OEM-compatible liquid-cooled compute, deployable in days once the site is stubbed up — no interconnection queue, no chiller plant, survives unmanned in West Texas</td></tr>
+<tr><td><strong>B — Energy Asset Owner</strong></td><td>Oil &amp; gas majors, renewable developers</td><td>Megawatts of stranded power (flared gas, curtailed wind/solar) generating zero revenue, no in-house AI infra expertise</td><td>Turn waste power into compute revenue via a turnkey, zero-maintenance appliance — pour a pad, pipe in the gas, we handle the FMEA and extreme-weather engineering</td></tr>
+</table>
+<p class="pct">Real target geography: Permian Basin / West Texas (flared gas, hot), Bakken / North Dakota (flared gas, cold), decommissioned Rust Belt industrial sites (existing grid interconnection, moderate climate) — chosen because stranded-power infrastructure and planet-extreme remoteness are anti-correlated, not because the design can't handle more extreme sites.</p>
+
+<h2>4. Project Status — How Much Is Left</h2>
+<p class="pct">Percentages below are a rough planning estimate for this overview only — not a tracked metric maintained elsewhere in the project. The authoritative, item-by-item state is <code>docs/minicenter-checklist.md</code>; this table exists to answer "roughly how far along are we," not to replace it.</p>
+
+<table>
+<tr><th>Phase</th><th>Progress</th><th></th><th>State</th></tr>
+<tr class="phase-row"><td>1. Architecture Decisions</td><td style="width:220px"><div class="bar-track"><div class="bar-fill" style="width:75%"></div></div></td><td class="pct">~75%</td><td>Pressure architecture, CDU ride-through, extreme-cold fluid spec, and remote-monitoring architecture are locked. Open: Motivair ambient envelope re-verification, generator start-timing claim (unverified twice, RFI drafted not sent), heat-rejection vendor selection, edge-gateway/cellular hardware selection.</td></tr>
+<tr class="phase-row"><td>Weight Budget</td><td style="width:220px"><div class="bar-track"><div class="bar-fill" style="width:90%"></div></div></td><td class="pct">~90%</td><td>Both skids comfortably clear per-truck limits. Two real gaps open: ORv3 rack-frame source unconfirmed, generator weight unverified against a real cutsheet.</td></tr>
+<tr class="phase-row"><td>2. Detailed Engineering</td><td style="width:220px"><div class="bar-track"><div class="bar-fill" style="width:40%"></div></div></td><td class="pct">~40%</td><td>Surge protection, sub-floor shock isolation, and the IP55/IP66 enclosure reconciliation are locked. Open: rack PSU dual-feed confirmation, structural weight take-off vs. ISO/road-legal ratings, shock/vibration logger spec, rodent/insect ingress sealing, DCIM/BMS integration, predictive alerting, and commissioning test procedures.</td></tr>
+<tr class="phase-row"><td>3. Bill of Materials</td><td style="width:220px"><div class="bar-track"><div class="bar-fill" style="width:60%"></div></div></td><td class="pct">~60%</td><td>BOM drafted with locked/RFI-gated/example status per line, rack geometry verified. Open: heat rejection + generator + ATS selections (RFI-gated), Cam-Lok/container cutsheets.</td></tr>
+<tr class="phase-row"><td>4. CAD / Modeling</td><td style="width:220px"><div class="bar-track"><div class="bar-fill" style="width:0%"></div></div></td><td class="pct">0%</td><td>Not started. Scoped as user-driven modeling (Inventor/Fusion/Revit) — this repo's pyRevit automation stays with the original Pod, not the Mini-Center.</td></tr>
+<tr class="phase-row"><td>5. Documentation Package</td><td style="width:220px"><div class="bar-track"><div class="bar-fill" style="width:80%"></div></div></td><td class="pct">~80%</td><td>Basis of Design, FMEA, TCS schematic, plain-language guide, site-prep guide, BOM doc, and this overview are done. Open: structural calc summary, commissioning/test procedure document, final consolidated revision once Phase 1 locks.</td></tr>
+<tr class="phase-row"><td>6. Business / Presentation</td><td style="width:220px"><div class="bar-track"><div class="bar-fill" style="width:50%"></div></div></td><td class="pct">~50%</td><td>Executive summary and competitive analysis (target segments, positioning) drafted. Open: OCP community/contribution angle, full presentation deck.</td></tr>
+</table>
+
+<h2>5. What's Actually Blocking Progress Right Now</h2>
+<table>
+<tr><th>Item</th><th>Status</th><th>Next action</th></tr>
+<tr><td>Generator start-timing (NFPA 110 ≤10s claim)</td><td><span class="badge badge-open">OPEN</span></td><td>RFI drafted, not sent — real answer requires Power Design Pro software or a direct vendor RFI, not another web search</td></tr>
+<tr><td>Generator weight (MD600/SG600)</td><td><span class="badge badge-open">OPEN</span></td><td>Never checked against a real downloaded cutsheet — two fabricated figures already rejected from outside AI tools</td></tr>
+<tr><td>Adiabatic heat rejection unit</td><td><span class="badge badge-partial">PARTIAL</span></td><td>First-principles sizing done (airflow, water use, fan power); vendor/model/exact dimensions still placeholder, gated behind selection software — RFI drafted</td></tr>
+<tr><td>Motivair MCDU-25 ambient envelope</td><td><span class="badge badge-open">OPEN</span></td><td>RFI drafted — vendor publishes no ambient rating; climate-kit sizing currently rests on a conservative assumption, not a verified spec</td></tr>
+<tr><td>Climate-kit AC re-verification</td><td><span class="badge badge-partial">PARTIAL</span></td><td>Re-run against the partitioned-compartment boundary (likely drops from the whole-container estimate, same pattern as the heater sizing correction)</td></tr>
+<tr><td>CAD / rough massing model</td><td><span class="badge badge-none">NOT STARTED</span></td><td>Locked geometry is safe to start now; detailed model waits on Phase 1 closure</td></tr>
+<tr><td>Presentation deck</td><td><span class="badge badge-none">NOT STARTED</span></td><td>Can reuse existing Basis of Design diagrams and FMEA highlights once outlined</td></tr>
+</table>
+
+<div class="callout warn"><strong>Nothing above is a design dead-end.</strong> Every open item is either a vendor RFI already drafted and waiting to be sent, or a task with a clear next step already identified. The architecture itself — two-skid split, positive-pressure cooling, weight budget, operating envelope, failure-response logic — is locked and internally consistent.</div>
+
+<h2>6. Companion Documents</h2>
+<div class="doclinks">
+  <a href="build-process-retrospective.html">Build Process Retrospective →</a>
+  <a href="minicenter-basis-of-design.html">Basis of Design →</a>
+  <a href="minicenter-fmea.html">FMEA →</a>
+  <a href="minicenter-bom.html">Bill of Materials →</a>
+  <a href="minicenter-executive-summary.html">Executive Summary →</a>
+  <a href="minicenter-competitive-analysis.md">Competitive Analysis →</a>
+  <a href="minicenter-tcs-loop.html">TCS Loop Schematic →</a>
+  <a href="minicenter-guide.html">Plain-Language Guide →</a>
+  <a href="minicenter-site-prep-guide.html">Site Prep Guide →</a>
+  <a href="rfi-drafts.md">RFI Drafts →</a>
+  <a href="minicenter-checklist.md">Master Checklist (source of truth) →</a>
+</div>
+
+<footer>
+  OCP Mini-Center Project Overview — Draft v0.1 — generated 2026-09-30. Progress percentages in Section 4 are a rough planning estimate for orientation only; <code>docs/minicenter-checklist.md</code> is the authoritative, item-level source of truth — check there before treating anything here as more precise than intended.
+</footer>
+
+</body>
+</html>
