@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>OCP Mini-Center — Role vs. Hyperscale &amp; Support Model</title>
+<style>
+  :root {
+    --ink: #1c1e22; --sub: #55595f; --line: #d8dbe0; --bg-panel: #f7f8fa;
+    --accent: #1a4a78; --warn-bg: #fff6e5; --warn-line: #e8c66b; --ok-bg: #eef7ee;
+  }
+  * { box-sizing: border-box; }
+  body { font-family: -apple-system,"Segoe UI",Helvetica,Arial,sans-serif; color:var(--ink); max-width:1040px; margin:0 auto; padding:40px 24px 100px; line-height:1.6; }
+  h1 { font-size: 30px; margin-bottom: 4px; }
+  h2 { font-size: 20px; margin-top: 52px; color: var(--accent); border-bottom: 2px solid var(--line); padding-bottom: 8px; }
+  h3 { font-size: 15.5px; margin-top: 26px; }
+  .status { display:inline-block; background:var(--warn-bg); border:1px solid var(--warn-line); color:#7a5a00; font-size:12.5px; font-weight:600; padding:4px 10px; border-radius:4px; margin-bottom:20px; }
+  .lede { color: var(--sub); font-size: 16px; max-width: 820px; }
+  table { border-collapse: collapse; width: 100%; margin: 14px 0; font-size: 13.5px; }
+  th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; vertical-align: top; }
+  th { background: var(--bg-panel); font-weight: 600; }
+  .callout { background:#eef2f7; border-left:4px solid var(--accent); padding:12px 16px; font-size:14px; margin:16px 0; }
+  .callout.warn { border-left-color: var(--warn-line); background: var(--warn-bg); color:#5a4600; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px; margin: 16px 0; }
+  .card { background: #fff; border:1px solid var(--line); border-radius:8px; padding:16px 18px; }
+  .card .t { font-weight: 700; font-size: 14.5px; margin-bottom: 6px; color: var(--accent); }
+  .card .d { font-size: 13px; color: var(--ink); }
+  ul, ol { padding-left: 22px; }
+  li { margin-bottom: 7px; }
+  code { background: #eef0f2; padding: 1px 5px; border-radius: 3px; font-size: 12.5px; }
+  footer { margin-top: 60px; color: var(--sub); font-size: 12px; border-top: 1px solid var(--line); padding-top: 14px; }
+</style>
+</head>
+<body>
+
+<h1>OCP Mini-Center — Role vs. Hyperscale &amp; Support Model</h1>
+<p class="lede">What this facility actually does, who it's for, why it isn't trying to be a small hyperscale site, and the specific ways it could support hyperscale operators rather than just compete with them.</p>
+<div class="status">POSITIONING — DRAFT v0.1 — 2026-10-06. Business framing built on already-locked engineering (Basis of Design, FMEA, weight/thermal budgets); the "support model" in Section 4 is new reasoning extending the existing target-customer work, not yet a checklist-tracked decision.</div>
+
+<h2>1. What It Does</h2>
+<p>A two-skid, crane-set, cable-terminated 520kW AI compute module: 4 OCP ORv3-class racks, N+1 Motivair MCDU-25 liquid cooling, standard 480V/415V 3-phase AC power, its own 600kW-class generator and adiabatic heat rejection — a complete, self-sufficient compute facility that needs a site with land, a power source (even a modest or intermittent one), and six to eight weeks of civil prep, not a utility interconnection or a multi-year construction schedule. It hosts standard commercial OEM AI hardware (GB200 NVL72-class racks) with no proprietary modification required.</p>
+
+<h2>2. Who It Serves</h2>
+<table>
+<tr><th>Segment</th><th>Who</th><th>Why they can't just build a hyperscale site</th></tr>
+<tr><td><strong>Neo-Cloud AI Operator</strong><br><span style="color:var(--sub);font-size:12px">Primary</span></td><td>Crusoe/CoreWeave-adjacent GPU cloud providers</td><td>Compute demand today, but grid interconnection queues for a new hyperscale-scale site run 24-36+ months — they need capacity now, at whatever power is already available</td></tr>
+<tr><td><strong>Energy Asset Owner</strong><br><span style="color:var(--sub);font-size:12px">Primary</span></td><td>Oil &amp; gas majors, renewable developers</td><td>Sitting on stranded megawatts (flared gas, curtailed wind/solar) with zero revenue and no in-house data center or AI expertise to build one</td></tr>
+<tr><td><strong>Rural / Edge / Disaster Response</strong><br><span style="color:var(--sub);font-size:12px">Secondary — Standard Tier</span></td><td>Telecom/SCADA operators, disaster-response agencies, forward-deployed government/military</td><td>Need rugged, lower-density (10-30kW/rack) compute in places a hyperscale or even regional data center will never reach</td></tr>
+</table>
+
+<h2>3. Advantage vs. a Hyperscale Site</h2>
+<p>This isn't a smaller, cheaper hyperscale site — it's a structurally different product solving a different constraint. A hyperscale campus optimizes for capacity at scale once it's built; the Mini-Center optimizes for time-to-power-on and siting flexibility at the cost of absolute scale.</p>
+<table>
+<tr><th>Dimension</th><th>Hyperscale Site</th><th>OCP Mini-Center</th></tr>
+<tr><td>Time to power-on</td><td>24-36+ months (entitlements, utility interconnection queue, construction)</td><td>Days to weeks once the site is stubbed up — pacing item is the customer's own civil prep, not construction</td></tr>
+<tr><td>Power source</td><td>Requires a large, firm utility interconnection or on-site substation buildout</td><td>Runs on existing stranded/intermittent power — flared gas, curtailed renewables, a decommissioned industrial interconnect — brings its own generator and cooling, no campus infrastructure required</td></tr>
+<tr><td>Siting flexibility</td><td>Constrained to sites with available grid capacity and often years of entitlement/permitting</td><td>Goes anywhere two flatbed trucks and a crane can reach; foundation options down to concrete piers</td></tr>
+<tr><td>Capital profile</td><td>Hundreds of millions to billions, monolithic commitment before first watt of compute ships</td><td>Two truckable skids, incremental — add another unit as demand or power availability grows</td></tr>
+<tr><td>Risk if demand doesn't materialize</td><td>Sunk campus-scale capital commitment</td><td>A single module's worth of exposure; relocatable in principle (not yet engineered as a repeated-redeployment product, but architecturally closer to that than a poured campus)</td></tr>
+<tr><td>Absolute scale ceiling</td><td>Tens to hundreds of megawatts per campus</td><td>520kW per module (Primary tier) — a deliberate tradeoff, not a limitation to be solved away</td></tr>
+</table>
+<div class="callout">The honest framing: hyperscale wins on raw scale and unit economics once built. The Mini-Center wins on everything upstream of "once built" — the months-to-years where a hyperscale site doesn't exist yet, can't exist yet, or will never exist at all at that location.</div>
+
+<h2>4. What Support Role Could the Mini-Center Play for Hyperscale Operators?</h2>
+<p>Rather than only a standalone alternative, the architecture has real fit as a companion product to hyperscale operators and energy-portfolio owners who already run hyperscale-scale infrastructure elsewhere. None of this is locked design work yet — it's a reasoned extension of the existing target-customer analysis, flagged as such.</p>
+<div class="cards">
+  <div class="card"><div class="t">Bridge capacity</div><div class="d">Deploy at a site where a hyperscale campus is permitted and under construction but not yet energized — fills the 24-36 month gap with real compute instead of idle land, then gets relocated or decommissioned once the permanent facility comes online.</div></div>
+  <div class="card"><div class="t">Stranded-asset monetization for hyperscale-adjacent portfolios</div><div class="d">A hyperscale operator or its power-portfolio partner often holds renewable PPAs with real curtailment — sited directly at the generation point, ahead of transmission buildout, rather than waiting for the grid to catch up.</div></div>
+  <div class="card"><div class="t">Burst / overflow capacity</div><div class="d">Short-notice demand spikes (a training run, a customer surge) that don't justify or can't wait for permanent campus expansion — portable capacity that can be added at an existing site's periphery.</div></div>
+  <div class="card"><div class="t">Disaster recovery / business continuity</div><div class="d">A truckable, self-sufficient compute module is a genuinely different failover story than a second data hall in the same region — can be positioned somewhere a primary facility's own outage or disaster doesn't reach.</div></div>
+  <div class="card"><div class="t">Forward-deployed / edge inference</div><div class="d">Pre-processing or inference close to remote data sources (oil &amp; gas fields, mining operations, military or disaster-response sites) feeding a central hyperscale training cluster — reduces bandwidth/latency rather than backhauling raw data.</div></div>
+  <div class="card"><div class="t">Low-risk pilot / testbed</div><div class="d">A contained module is a lower-stakes place to pilot a new rack generation or cooling architecture before a full campus commitment — including, eventually, a future 800VDC-native rack generation once that becomes real commercial hardware (see the open question below).</div></div>
+</div>
+
+<h3>Where this connects back to 800VDC</h3>
+<p>One specific version of the "pilot/testbed" role: if commercial AI racks eventually ship with native 800VDC input (an industry roadmap item — OCP's Mt. Diablo workstream, publicly discussed Nvidia next-generation rack plans — not available in commercial hardware today), the original Pod design's already-verified 800VDC engineering basis means a Mini-Center-class module could plausibly be the first real-world proving ground for that architecture at small scale, before a hyperscale operator commits campus-wide. That's a real option this project is positioned for, not a current capability — still gated on the same external dependency discussed previously: commercial rack vendors actually shipping 800VDC-native hardware.</p>
+
+<h2>5. What This Is Not</h2>
+<ul>
+  <li>Not a replacement for hyperscale campuses at the multi-tens-of-megawatt training-cluster scale — 520kW is a deliberate ceiling, not a limitation being engineered away</li>
+  <li>Not yet engineered as a repeatedly-relocatable product (the bridge-capacity and disaster-recovery roles above are architecturally plausible given the truckable two-skid design, but re-deployment hasn't been designed or tested as its own use case)</li>
+  <li>Not a general-purpose enterprise or colocation offering — purpose-built for stranded power, not a shared-tenancy or carrier-neutral facility</li>
+</ul>
+
+<footer>
+  OCP Mini-Center — Role vs. Hyperscale &amp; Support Model — Draft v0.1 — 2026-10-06. Companion to <code>minicenter-executive-summary.html</code> and <code>minicenter-competitive-analysis.md</code>; Section 4 is new positioning reasoning, not yet reflected in <code>minicenter-checklist.md</code>.
+</footer>
+
+</body>
+</html>
