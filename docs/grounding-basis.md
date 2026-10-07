@@ -32,8 +32,8 @@ Inside the container, all non-current-carrying conductive metal must bond back t
 - **General halo grid:** A bare copper halo ground ring runs along the interior perimeter (cable tray or under-floor), bonding the raised floor pedestals and cable tray sections. 6 AWG is a defensible minimum here since this grid isn't tied to one specific circuit's overcurrent device.
 - **Equipment jumpers (rack/CDU-specific — do not use the 6 AWG halo figure here):** Jumpers from the halo to the ORv3 rack frames and Motivair CDU chassis must be sized per NEC Table 250.122 based on their actual supply circuit's overcurrent device, not the general halo figure.
   - *Rack/CDU feeders:* supplied by 225A trip branch breakers (`electrical-schedules.md`, PDU schedule).
-  - *Minimum size:* Table 250.122's 201-300A bracket requires **4 AWG minimum** — 6 AWG is undersized here and must not be used for these specific jumpers.
-  - *Proportional upsizing check, not yet resolved:* per NEC 250.122(B), because the rack branch phase conductors were already upsized to 4/0 AWG Cu (to clear the 240.4(B) breaker/conductor mismatch corrected in `electrical-schedules.md`), the grounding conductor must be checked for a proportional increase above the 4 AWG table minimum before final installation — not yet calculated, flagged here rather than asserting a final number.
+  - *Minimum size:* Table 250.122's 201-300A bracket requires **4 AWG minimum** (41,740 cmil) — 6 AWG is undersized here and must not be used for these specific jumpers.
+  - *Proportional upsizing — RESOLVED 2026-10-07, step to 2 AWG:* per NEC 250.122(B), because the rack branch phase conductors were upsized to 4/0 AWG Cu (211,600 cmil) from the 3/0 AWG base (167,800 cmil), the ratio is 211,600/167,800 = 1.261. Applied to the 4 AWG base EGC: 41,740 cmil × 1.261 = 52,634 cmil required. 3 AWG (52,620 cmil) misses this by 14 cmil — not close enough to round down. **Minimum size is 2 AWG copper (66,360 cmil)** for the rack and CDU equipment bonding jumpers specifically.
 
 ---
 Companion to `electrical-schedules.md`, `minicenter-fmea.html`, and `pre-cad-readiness.md`.
